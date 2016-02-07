@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Danmu Libruary</title>
+
+    <style>
+        .container {
+            width: 80%;
+            margin: 30px 10%;
+        }
+
+        .container > h3 {
+            text-align: center;
+        }
+
+        #danmu_container {
+            width: 80%;
+            height: 600px;
+            margin: 20px 10%;
+            background-color: #8888ff;
+        }
+    </style>
+
+    <link rel="stylesheet" href="../dest/css/main.css"/>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h3>Comment Test</h3>
+
+    <div id='my-player' class='abp'>
+        <div id='danmu_container' class='container'></div>
+    </div>
+
+
+</div>
+
+<script src="http://cdn.bootcss.com/jquery/2.2.0/jquery.js"></script>
+
+<script src="../dest/js/app.js"></script>
+
+<script>
+    function CommentLoader(url, xcm, mode) {
+        if (mode == null)
+            mode = 'bilibili';
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        }
+        else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+        var cm = xcm;
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                if (mode == 'bilibili') {
+                    if (navigator.appName == 'Microsoft Internet Explorer') {
+                        var f = new ActiveXObject("Microsoft.XMLDOM");
+                        f.async = false;
+                        f.loadXML(xmlhttp.responseText);
+                        cm.load(BilibiliParser(f, xmlhttp.responseText));
+                    } else {
+                        cm.load(BilibiliParser(xmlhttp.responseXML, xmlhttp.responseText));
+                    }
+                } else if (mode == 'acfun') {
+                    cm.load(AcfunParser(xmlhttp.responseText));
+                }
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        var cm = new CommentManager(document.getElementById('danmu_container'));
+
+        cm.init();
+
+        CommentLoader('http://comment.bilibili.cn/5953559.xml', cm);
+
+        setTimeout(function () {
+            alert('弹幕开始');
+
+            cm.start();
+
+            cm.time(1000);
+
+        }, 1000);
+
+
+    });
+
+</script>
+
+</body>
+</html>

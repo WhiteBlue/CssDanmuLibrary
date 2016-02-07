@@ -1,0 +1,20 @@
+{
+  "name": "danmu-libruary",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "WhiteBlue",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-cssnano": "^2.1.0",
+    "gulp-jshint": "^2.0.0",
+    "gulp-uglify": "^1.5.1",
+    "jshint": "^2.9.1"
+  }
+}
