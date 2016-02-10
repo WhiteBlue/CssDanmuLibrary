@@ -86,8 +86,8 @@ var CommentManager = (function () {
             this.csa[comAlloc].setBounds(this.width, this.height);
         }
         //动画初始化
-        this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
-        this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
+        //this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
+        //this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
     };
 
     //寻找当前时间点的弹幕index , 同时刷新position
@@ -182,7 +182,8 @@ var CommentManager = (function () {
         for (; this.position < this.timeline.length; this.position++) {
             if (this.timeline[this.position]['stime'] <= time) {
                 //发送弹幕
-                this.send(this.timeline[this.position]);
+                console.log(this.timeline[this.position]);
+                //this.send(this.timeline[this.position]);
             } else {
                 //弹幕开始时间超过当前时间 , 结束循环
                 break;
@@ -191,13 +192,14 @@ var CommentManager = (function () {
     };
 
 
-    //时间更新(刷新弹幕)
+    //时间更新,使timeline中的弹幕运动
     CommentManager.prototype.onTimerEvent = function (timePassed, cmObj) {
         for (var i = 0; i < cmObj.runline.length; i++) {
             var cmt = cmObj.runline[i];
-            if (cmt.hold) {
-                continue;
-            }
+            //if (cmt.hold) {
+            //    continue;
+            //}
+            //弹幕移动
             cmt.time(timePassed);
         }
     };

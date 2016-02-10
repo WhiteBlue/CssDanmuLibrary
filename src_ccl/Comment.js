@@ -46,6 +46,7 @@ var CoreComment = (function () {
         if (init.hasOwnProperty("text")) {
             this.text = init["text"];
         }
+        //定位弹幕用
         if (init.hasOwnProperty("motion")) {
             this._motionStart = [];
             this._motionEnd = [];
@@ -338,6 +339,7 @@ var CoreComment = (function () {
     });
 
 
+    //时间更新,使弹幕运动
     CoreComment.prototype.time = function (time) {
         this.ttl -= time;
         if (this.ttl < 0) {
@@ -371,6 +373,7 @@ var CoreComment = (function () {
         }
     };
 
+    //弹幕像素运动
     CoreComment.prototype.animate = function () {
         if (this._alphaMotion) {
             this.alpha = (this.dur - this.ttl) * (this._alphaMotion["to"] - this._alphaMotion["from"]) / this.dur + this._alphaMotion["from"];
@@ -441,7 +444,8 @@ var ScrollComment = (function (_super) {
 var CSSCompatLayer = (function () {
     function CSSCompatLayer() {
     }
-    CSSCompatLayer.transform = function (dom, trans) {
+
+    CSSCompatLayer.prototype.transform = function (dom, trans) {
         dom.style.transform = trans;
         dom.style["webkitTransform"] = trans;
         dom.style["msTransform"] = trans;

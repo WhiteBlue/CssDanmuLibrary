@@ -9,7 +9,6 @@
 </head>
 
 <body>
-
 <div class="row text-center">
     <h3>Danmu CSS test</h3>
 </div>
@@ -23,19 +22,16 @@
     </div>
 </div>
 
-
 <script src="http://cdn.bootcss.com/jquery/2.2.0/jquery.min.js"></script>
-
 <script src="http://vjs.zencdn.net/5.6.0/video.js"></script>
-
 <script src="../dest/js/app.js"></script>
-
 <script src="PlayerPlugin.js"></script>
-
 <script>
     $(document).ready(function () {
+        var date = new Date(1454713841*1000);
+        alert(date);
         loadVideoJsAndPlugin();
-        loadVideo('http://cn-tj1-cu.acgvideo.com/vg107/4/c9/5959690hd.mp4?expires=1454882100&ssig=Pg76nana6n6owRmKidQiug&oi=2021932405&appkey=4ebafd7c4951b366&or=2362433421&rate=0', 'http://comment.bilibili.cn/5959690.xml');
+        loadVideo('../5959690hd.mp4', 'http://comment.bilibili.cn/5959690.xml');
     });
 </script>
 </body>

@@ -21,6 +21,16 @@ gulp.task('js', function () {
         .pipe(gulp.dest('dest/js'))
 });
 
+
+gulp.task('debug', function () {
+    gulp.src('src/*.js')
+        .pipe(concat('app.js'))
+        .pipe(gulp.dest('dest/js'));
+    gulp.src('src/css/*.css')
+        .pipe(concat('main.css'))
+        .pipe(gulp.dest('dest/css'));
+});
+
 gulp.task('css', function () {
     gulp.src('src/css/*.css')
         .pipe(concat('main.css'))
@@ -29,18 +39,24 @@ gulp.task('css', function () {
 });
 
 gulp.task('watchcss', function () {
-    return gulp.watch('src/css/*.css', ['css']);
+    return gulp.watch('src/css/*.css', ['debug']);
+});
+
+gulp.task('concat_ccl', function () {
+    gulp.src('src_ccl/*.js')
+        .pipe(concat('app.js'))
+        .pipe(gulp.dest('dest_ccl/js'));
+    gulp.src('src_ccl/css/*.css')
+        .pipe(concat('main.css'))
+        .pipe(gulp.dest('dest_ccl/css'));
 });
 
 gulp.task('watchjs', function () {
-    return gulp.watch('src/*.js', ['js']);
+    return gulp.watch('src/*.js', ['debug']);
 });
 
 gulp.task('default', ['clean', 'js', 'css']);
 
-gulp.task('watch', ['clean', 'default', 'watchjs', 'watchcss']);
+gulp.task('watch', ['clean', 'debug', 'watchjs', 'watchcss']);
 
-
-
-
-
+gulp.task('debug_ccl', ['clean', 'concat_ccl']);

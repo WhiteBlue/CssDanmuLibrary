@@ -57,17 +57,13 @@
         var cm = xcm;
         xmlhttp.onreadystatechange = function () {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                if (mode == 'bilibili') {
-                    if (navigator.appName == 'Microsoft Internet Explorer') {
-                        var f = new ActiveXObject("Microsoft.XMLDOM");
-                        f.async = false;
-                        f.loadXML(xmlhttp.responseText);
-                        cm.load(BilibiliParser(f, xmlhttp.responseText));
-                    } else {
-                        cm.load(BilibiliParser(xmlhttp.responseXML, xmlhttp.responseText));
-                    }
-                } else if (mode == 'acfun') {
-                    cm.load(AcfunParser(xmlhttp.responseText));
+                if (navigator.appName == 'Microsoft Internet Explorer') {
+                    var f = new ActiveXObject("Microsoft.XMLDOM");
+                    f.async = false;
+                    f.loadXML(xmlhttp.responseText);
+                    cm.load(BilibiliParser(f));
+                } else {
+                    cm.load(BilibiliParser(xmlhttp.responseXML));
                 }
             }
         }
@@ -83,7 +79,7 @@
         setTimeout(function () {
             alert('弹幕开始');
 
-            cm.start();
+//            cm.start();
 
             cm.time(1000);
 

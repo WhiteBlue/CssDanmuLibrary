@@ -11,6 +11,7 @@ var CommentSpaceAllocator = (function () {
         ];
         //弹幕边距容差
         this.avoid = 1;
+        this.className = 'cmt';
         this._width = width;
         this._height = height;
     }
