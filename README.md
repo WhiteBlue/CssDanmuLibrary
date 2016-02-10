@@ -1,5 +1,5 @@
-# simple-danmu-libruary
-基于common-comment-libruary的重构版本
+# simple-danmu-library
+基于common-comment-library的重构版本
 
 
 ## 开发中,仅测试用
