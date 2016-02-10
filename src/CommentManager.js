@@ -5,6 +5,8 @@
 function CommentManager(stage) {
     this.stage = stage;
     this.options = {
+        className: "cmt",
+        margin: 2,
         fresh: 10       //刷新频率
     };
     this.commentLine = [];      //总弹幕队列
@@ -47,7 +49,13 @@ function CommentManager(stage) {
 
     //在当前队列插入弹幕
     this.send = function (data) {
-        var cmt = new CommentObject(this, data);
+        var cmt;
+        if (data.mode === 5) {
+            cmt = new TopPositionComment(this, data);
+        } else {
+            //cmt = new CommentObject(this, data);
+            return;
+        }
 
         //对齐方式判定
         switch (cmt.mode) {
@@ -68,13 +76,21 @@ function CommentManager(stage) {
         }
 
         //执行初始化,创建node
-        cm.init();
-        cm.layout();
+        cmt.init();
 
         //dom插入
         this.stage.appendChild(cmt.dom);
 
-        this.nowLine.push(cm);
+        this.nowLine.push(cmt);
+        this.nowLine.sort(function (a, b) {
+            if (a.y >= b.y) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+
+        cmt.layout();
     };
 
     //跳转到指定时间
@@ -114,8 +130,8 @@ function CommentManager(stage) {
 
     //更新时间,移动弹幕
     this.onTimerEvent = function (timePassed, cmObj) {
-        for (var i = 0; i < cmObj.runline.length; i++) {
-            var cmt = cmObj.runline[i];
+        for (var i = 0; i < cmObj.nowLine.length; i++) {
+            var cmt = cmObj.nowLine[i];
             cmt.time(timePassed);
         }
     };

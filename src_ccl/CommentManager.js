@@ -276,7 +276,7 @@ var CommentManager = (function () {
                     else if (a.dbid < b.dbid) return -1;
                     return 0;
                 } else
-                    return 0;
+                    return 0;fontSize
             }
         });
     };
