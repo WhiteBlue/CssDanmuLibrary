@@ -89,7 +89,6 @@ function CommentManager(stage) {
                 return -1;
             }
         });
-
         cmt.layout();
     };
 
@@ -150,10 +149,10 @@ function CommentManager(stage) {
 
     //移除弹幕
     this.remove = function (cmObj) {
+        this.stage.removeChild(cmObj.dom);
         var index = this.nowLine.indexOf(cmObj);
         if (index >= 0) {
-            this.stage.removeChild(cmObj.dom);
-            this.nowLine.slice(index, 1);
+            this.nowLine.splice(index, 1);
         }
     };
 }
