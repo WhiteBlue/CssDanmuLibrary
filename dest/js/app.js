@@ -255,6 +255,8 @@ function CommentManager(stage) {
             cmt = new StaticComment(this, data);
         } else if (data.mode === 1 || data.mode === 2) {
             cmt = new ScrollComment(this, data);
+        } else {
+            return;
         }
 
         //执行初始化,创建node
