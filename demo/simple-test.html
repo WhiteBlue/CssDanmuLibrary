@@ -43,30 +43,60 @@
 
 <script>
 
+    function CommentLoader(url, xcm, mode) {
+        if (mode == null)
+            mode = 'bilibili';
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        }
+        else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+        var cm = xcm;
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                if (mode == 'bilibili') {
+                    if (navigator.appName == 'Microsoft Internet Explorer') {
+                        var f = new ActiveXObject("Microsoft.XMLDOM");
+                        f.async = false;
+                        f.loadXML(xmlhttp.responseText);
+                        cm.load(BilibiliParser(f, xmlhttp.responseText));
+                    } else {
+                        cm.load(BilibiliParser(xmlhttp.responseXML, xmlhttp.responseText));
+                    }
+                } else if (mode == 'acfun') {
+                    cm.load(AcfunParser(xmlhttp.responseText));
+                }
+            }
+        }
+    }
+
     $(document).ready(function () {
         var cm = new CommentManager(document.getElementById('danmu_container'));
 
         cm.init();
 
-//        cm.start();
-
-        for (var i = 0; i < 15; i++) {
-            cm.send({mode: 5, text: "第" + i + "个顶部弹幕"});
-        }
-
-        for (var j = 0; j < 15; j++) {
-            cm.send({mode: 4, text: "第" + j + "个底部弹幕", align: 3});
-        }
-
-//        CommentLoader('http://comment.bilibili.cn/5953559.xml', cm);
-
-//        setTimeout(function () {
-//            alert('弹幕开始');
+        cm.start();
 //
+//        for (var i = 0; i < 15; i++) {
+//            cm.send({mode: 1, text: "第" + i + "个滚动弹幕"});
+//        }
 //
-//            cm.time(1000);
-//
-//        }, 1000);
+//        for (var j = 0; j < 15; j++) {
+//            cm.send({mode: 4, text: "第" + j + "个底部弹幕", align: 3});
+//        }
+
+        CommentLoader('http://comment.bilibili.cn/5953559.xml', cm);
+
+        setTimeout(function () {
+            alert('弹幕开始');
+
+
+            cm.time(1000);
+
+        }, 1000);
 
 
     });

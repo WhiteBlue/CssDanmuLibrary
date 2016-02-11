@@ -1,5 +1,8 @@
 /**
  * Created by WhiteBlue on 16/2/10.
+ *
+ *
+ * 静止弹幕: 4.底部弹幕  5.顶部弹幕
  */
 
 var StaticComment = (function (_super) {

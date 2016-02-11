@@ -12,6 +12,7 @@ var CommentObject = (function () {
         this.stime = 0;
         this.text = "";
         this.lastTime = 4000;
+        this.lifeTIme = 4000;
         this.movable = false;
         this._size = 25;
         this._color = 0xffffff;
@@ -185,6 +186,11 @@ var CommentObject = (function () {
         }
     };
 
+    //弹幕生命周期结束
+    CommentObject.prototype.finish = function () {
+        this.manager.remove(this);
+    };
+
     //弹幕刷新动画
     CommentObject.prototype.update = function () {
     };
@@ -193,10 +199,6 @@ var CommentObject = (function () {
     CommentObject.prototype.layout = function () {
     };
 
-    //弹幕生命周期结束
-    CommentObject.prototype.finish = function () {
-        this.manager.remove(this);
-    };
     return CommentObject;
 })();
 

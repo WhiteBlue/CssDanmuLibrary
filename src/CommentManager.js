@@ -66,27 +66,8 @@ function CommentManager(stage) {
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
             cmt = new StaticComment(this, data);
-        } else {
-            //cmt = new CommentObject(this, data);
-            return;
-        }
-
-        //对齐方式判定
-        switch (cmt.mode) {
-            case 1:
-                cmt.align = 0;
-                break;
-            case 2:
-                cmt.align = 2;
-                break;
-            case 4:
-                cmt.align = 2;
-                break;
-            case 5:
-                cmt.align = 0;
-                break;
-            case 6:
-                cmt.align = 1;
+        } else if (data.mode === 1 || data.mode === 2) {
+            cmt = new ScrollComment(this, data);
         }
 
         //执行初始化,创建node
@@ -161,6 +142,14 @@ function CommentManager(stage) {
         var index = this.nowLine.indexOf(cmObj);
         if (index >= 0) {
             this.nowLine.splice(index, 1);
+        }
+    };
+
+
+    //清除舞台
+    this.clear = function () {
+        while (this.nowLine.length > 0) {
+            this.nowLine[0].finish();
         }
     };
 }
