@@ -22,7 +22,7 @@ var StaticComment = (function (_super) {
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
                 if (cmObj.y - preY >= channel) {
-                    return cmObj.y;
+                    return preY;
                 } else {
                     preY = cmObj.y + cmObj.height;
                 }
@@ -50,6 +50,7 @@ var StaticComment = (function (_super) {
             index++;
             offset += 12;
         }
+
         this.index = index - 1;
         this.x = this.manager.stage.offsetLeft + (this.manager.stage.offsetWidth - this.width) / 2;
         this.y = insertY;

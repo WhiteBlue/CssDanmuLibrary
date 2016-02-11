@@ -78,25 +78,25 @@
 
         cm.init();
 
-        cm.start();
+//        cm.start();
 //
-//        for (var i = 0; i < 15; i++) {
-//            cm.send({mode: 1, text: "第" + i + "个滚动弹幕"});
-//        }
+        for (var i = 0; i < 30; i++) {
+            cm.send({mode: 1, text: "第" + i + "个滚动弹幕"});
+        }
 //
 //        for (var j = 0; j < 15; j++) {
 //            cm.send({mode: 4, text: "第" + j + "个底部弹幕", align: 3});
 //        }
 
-        CommentLoader('http://comment.bilibili.cn/5953559.xml', cm);
-
-        setTimeout(function () {
-            alert('弹幕开始');
-
-
-            cm.time(1000);
-
-        }, 1000);
+//        CommentLoader('http://comment.bilibili.cn/5953559.xml', cm);
+//
+//        setTimeout(function () {
+//            alert('弹幕开始');
+//
+//
+//            cm.time(1000);
+//
+//        }, 1000);
 
 
     });

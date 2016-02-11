@@ -19,9 +19,24 @@ function CommentManager(stage) {
 
 
     //同屏队列插入新元素并重排序
-    this.nowLinePush = function (cmtObj) {
-        this.nowLine.push(cmtObj);
+    this.nowLinePush = function (pushCmt) {
+        this.nowLine.push(pushCmt);
         //重新整理
+        this.nowLine.sort(function (a, b) {
+            if (a.y >= b.y) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+    };
+
+    //同屏队列移除元素并重排序
+    this.nowLineRemove = function (removeCmt) {
+        var index = this.nowLine.indexOf(removeCmt);
+        if (index >= 0) {
+            this.nowLine.splice(index, 1);
+        }
         this.nowLine.sort(function (a, b) {
             if (a.y >= b.y) {
                 return 1;
@@ -34,16 +49,16 @@ function CommentManager(stage) {
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
-        //动画初始化
-        //this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
-        //this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
+
+        this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
+        this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
     };
 
     this.init = function () {
         this.setBounds();
     };
 
-    this.start = function () {
+    this.startTimer = function () {
         if (this.timer) {
             return;
         }
@@ -52,16 +67,16 @@ function CommentManager(stage) {
             //取时间差
             var elapsed = new Date().getTime() - cm.lastTime;
             cm.lastTime = new Date().getTime();
-            cm.onTimerEvent(elapsed, cm);
+            cm.onTimerEvent(elapsed);
         }, this.options.fresh);
     };
 
-    this.stop = function () {
+    this.stopTimer = function () {
         window.clearInterval(this.timer);
         this.timer = 0;
     };
 
-    //在当前队列插入弹幕
+    //插入弹幕
     this.send = function (data) {
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
@@ -82,13 +97,13 @@ function CommentManager(stage) {
     };
 
     //跳转到指定时间
-    this.locate = function (locateTime) {
+    this.seek = function (locateTime) {
         this.position = 0;
-        this.position = this.seek(locateTime);
+        this.position = this.locate(locateTime);
     };
 
     //定位弹幕队列
-    this.seek = function (time) {
+    this.locate = function (time) {
         for (var i = this.position; i < this.commentLine.length; i++) {
             var cm = this.commentLine[i];
             if (cm.stime >= time) {
@@ -104,11 +119,10 @@ function CommentManager(stage) {
         betweenTime -= 1;
 
         if (this.position >= this.commentLine.length) {
-            console.log('播放完成');
             return;
         }
 
-        var end = this.seek(betweenTime);
+        var end = this.locate(betweenTime);
 
         for (; this.position < end; this.position++) {
             this.send(this.commentLine[this.position]);
@@ -117,10 +131,14 @@ function CommentManager(stage) {
     };
 
     //更新时间,移动弹幕
-    this.onTimerEvent = function (timePassed, cmObj) {
-        for (var i = 0; i < cmObj.nowLine.length; i++) {
-            var cmt = cmObj.nowLine[i];
-            cmt.time(timePassed);
+    this.onTimerEvent = function (timePassed) {
+        var length = this.nowLine.length;
+        for (var i = 0; i < length; i++) {
+            var cmt = this.nowLine[i];
+            if (!cmt.time(timePassed)) {
+                this.remove(cmt);
+                length--;
+            }
         }
     };
 
@@ -137,11 +155,13 @@ function CommentManager(stage) {
     };
 
     //移除弹幕
-    this.remove = function (cmObj) {
-        this.stage.removeChild(cmObj.dom);
-        var index = this.nowLine.indexOf(cmObj);
-        if (index >= 0) {
-            this.nowLine.splice(index, 1);
+    this.remove = function (rmObj) {
+        this.nowLineRemove(rmObj);
+        try {
+            this.stage.removeChild(rmObj.dom);
+        } catch (e) {
+            console.log(e);
+            console.log(rmObj);
         }
     };
 

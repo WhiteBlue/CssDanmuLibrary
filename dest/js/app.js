@@ -191,9 +191,24 @@ function CommentManager(stage) {
 
 
     //同屏队列插入新元素并重排序
-    this.nowLinePush = function (cmtObj) {
-        this.nowLine.push(cmtObj);
+    this.nowLinePush = function (pushCmt) {
+        this.nowLine.push(pushCmt);
         //重新整理
+        this.nowLine.sort(function (a, b) {
+            if (a.y >= b.y) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+    };
+
+    //同屏队列移除元素并重排序
+    this.nowLineRemove = function (removeCmt) {
+        var index = this.nowLine.indexOf(removeCmt);
+        if (index >= 0) {
+            this.nowLine.splice(index, 1);
+        }
         this.nowLine.sort(function (a, b) {
             if (a.y >= b.y) {
                 return 1;
@@ -206,16 +221,16 @@ function CommentManager(stage) {
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
-        //动画初始化
-        //this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
-        //this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
+
+        this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
+        this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
     };
 
     this.init = function () {
         this.setBounds();
     };
 
-    this.start = function () {
+    this.startTimer = function () {
         if (this.timer) {
             return;
         }
@@ -224,16 +239,16 @@ function CommentManager(stage) {
             //取时间差
             var elapsed = new Date().getTime() - cm.lastTime;
             cm.lastTime = new Date().getTime();
-            cm.onTimerEvent(elapsed, cm);
+            cm.onTimerEvent(elapsed);
         }, this.options.fresh);
     };
 
-    this.stop = function () {
+    this.stopTimer = function () {
         window.clearInterval(this.timer);
         this.timer = 0;
     };
 
-    //在当前队列插入弹幕
+    //插入弹幕
     this.send = function (data) {
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
@@ -254,13 +269,13 @@ function CommentManager(stage) {
     };
 
     //跳转到指定时间
-    this.locate = function (locateTime) {
+    this.seek = function (locateTime) {
         this.position = 0;
-        this.position = this.seek(locateTime);
+        this.position = this.locate(locateTime);
     };
 
     //定位弹幕队列
-    this.seek = function (time) {
+    this.locate = function (time) {
         for (var i = this.position; i < this.commentLine.length; i++) {
             var cm = this.commentLine[i];
             if (cm.stime >= time) {
@@ -276,11 +291,10 @@ function CommentManager(stage) {
         betweenTime -= 1;
 
         if (this.position >= this.commentLine.length) {
-            console.log('播放完成');
             return;
         }
 
-        var end = this.seek(betweenTime);
+        var end = this.locate(betweenTime);
 
         for (; this.position < end; this.position++) {
             this.send(this.commentLine[this.position]);
@@ -289,10 +303,14 @@ function CommentManager(stage) {
     };
 
     //更新时间,移动弹幕
-    this.onTimerEvent = function (timePassed, cmObj) {
-        for (var i = 0; i < cmObj.nowLine.length; i++) {
-            var cmt = cmObj.nowLine[i];
-            cmt.time(timePassed);
+    this.onTimerEvent = function (timePassed) {
+        var length = this.nowLine.length;
+        for (var i = 0; i < length; i++) {
+            var cmt = this.nowLine[i];
+            if (!cmt.time(timePassed)) {
+                this.remove(cmt);
+                length--;
+            }
         }
     };
 
@@ -309,11 +327,21 @@ function CommentManager(stage) {
     };
 
     //移除弹幕
-    this.remove = function (cmObj) {
-        this.stage.removeChild(cmObj.dom);
-        var index = this.nowLine.indexOf(cmObj);
-        if (index >= 0) {
-            this.nowLine.splice(index, 1);
+    this.remove = function (rmObj) {
+        this.nowLineRemove(rmObj);
+        try {
+            this.stage.removeChild(rmObj.dom);
+        } catch (e) {
+            console.log(e);
+            console.log(rmObj);
+        }
+    };
+
+
+    //清除舞台
+    this.clear = function () {
+        while (this.nowLine.length > 0) {
+            this.nowLine[0].finish();
         }
     };
 }
@@ -331,7 +359,7 @@ var CommentObject = (function () {
         this.stime = 0;
         this.text = "";
         this.lastTime = 4000;
-        this.lifeTIme = 4000;
+        this.lifeTime = 4000;
         this.movable = false;
         this._size = 25;
         this._color = 0xffffff;
@@ -397,6 +425,7 @@ var CommentObject = (function () {
                     //上对齐
                     this._y = this.dom.offsetTop;
                 } else {
+                    //下对齐
                     this._y = this.manager.stage.offsetHeight - (this.dom.offsetTop + this.dom.offsetHeight);
                 }
             }
@@ -424,7 +453,7 @@ var CommentObject = (function () {
             color = color.length >= 6 ? color : new Array(6 - color.length + 1).join("0") + color;
             this.dom.style.color = "#" + color;
             if (this._color === 0) {
-                this.dom.className = this.parent.options.global.className + " rshadow";
+                this.dom.className = this.manager.options.className + " rshadow";
             }
         },
         enumerable: true,
@@ -498,11 +527,11 @@ var CommentObject = (function () {
             this.lastTime = 0;
         }
         if (this.movable) {
-            this.update();
+            if (!this.update()) {
+                return false;
+            }
         }
-        if (this.lastTime <= 0) {
-            this.finish();
-        }
+        return this.lastTime > 0;
     };
 
     //弹幕生命周期结束
@@ -512,6 +541,7 @@ var CommentObject = (function () {
 
     //弹幕刷新动画
     CommentObject.prototype.update = function () {
+        return true;
     };
 
     //弹幕排布方法
@@ -547,12 +577,12 @@ var ScrollComment = (function (_super) {
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
                 if (cmObj.y - preY >= channel) {
-                    return cmObj.y;
+                    return preY;
                 }
-                //弹幕无碰撞,同channel插入
-                if (cmObj.stime + cmObj.lastTime <= this.stime + this.lastTime / 2) {
-                    return cmObj.y;
-                }
+                ////弹幕无碰撞,同channel插入
+                //if (cmObj.stime + cmObj.lastTime <= this.stime + this.lastTime / 2) {
+                //    return cmObj.y;
+                //}
                 preY = cmObj.y + cmObj.height;
             }
         }
@@ -583,7 +613,10 @@ var ScrollComment = (function (_super) {
     };
 
     ScrollComment.prototype.update = function () {
-        this.x = (this.lastTime / this.lifeTIme) * (this.manager.width + this.width) - this.width;
+        var preX = (this.lastTime / this.lifeTime) * (this.manager.width + this.width) - this.width;
+        this.x = preX;
+        return preX > -this.width;
+
     };
 
     return ScrollComment;
@@ -612,7 +645,7 @@ var StaticComment = (function (_super) {
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
                 if (cmObj.y - preY >= channel) {
-                    return cmObj.y;
+                    return preY;
                 } else {
                     preY = cmObj.y + cmObj.height;
                 }
@@ -640,6 +673,7 @@ var StaticComment = (function (_super) {
             index++;
             offset += 12;
         }
+
         this.index = index - 1;
         this.x = this.manager.stage.offsetLeft + (this.manager.stage.offsetWidth - this.width) / 2;
         this.y = insertY;

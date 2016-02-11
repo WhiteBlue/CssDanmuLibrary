@@ -22,12 +22,12 @@ var ScrollComment = (function (_super) {
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
                 if (cmObj.y - preY >= channel) {
-                    return cmObj.y;
+                    return preY;
                 }
-                //弹幕无碰撞,同channel插入
-                if (cmObj.stime + cmObj.lastTime <= this.stime + this.lastTime / 2) {
-                    return cmObj.y;
-                }
+                ////弹幕无碰撞,同channel插入
+                //if (cmObj.stime + cmObj.lastTime <= this.stime + this.lastTime / 2) {
+                //    return cmObj.y;
+                //}
                 preY = cmObj.y + cmObj.height;
             }
         }
@@ -58,7 +58,10 @@ var ScrollComment = (function (_super) {
     };
 
     ScrollComment.prototype.update = function () {
-        this.x = (this.lastTime / this.lifeTIme) * (this.manager.width + this.width) - this.width;
+        var preX = (this.lastTime / this.lifeTime) * (this.manager.width + this.width) - this.width;
+        this.x = preX;
+        return preX > -this.width;
+
     };
 
     return ScrollComment;

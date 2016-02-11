@@ -12,7 +12,7 @@ var CommentObject = (function () {
         this.stime = 0;
         this.text = "";
         this.lastTime = 4000;
-        this.lifeTIme = 4000;
+        this.lifeTime = 4000;
         this.movable = false;
         this._size = 25;
         this._color = 0xffffff;
@@ -78,6 +78,7 @@ var CommentObject = (function () {
                     //上对齐
                     this._y = this.dom.offsetTop;
                 } else {
+                    //下对齐
                     this._y = this.manager.stage.offsetHeight - (this.dom.offsetTop + this.dom.offsetHeight);
                 }
             }
@@ -105,7 +106,7 @@ var CommentObject = (function () {
             color = color.length >= 6 ? color : new Array(6 - color.length + 1).join("0") + color;
             this.dom.style.color = "#" + color;
             if (this._color === 0) {
-                this.dom.className = this.parent.options.global.className + " rshadow";
+                this.dom.className = this.manager.options.className + " rshadow";
             }
         },
         enumerable: true,
@@ -179,11 +180,11 @@ var CommentObject = (function () {
             this.lastTime = 0;
         }
         if (this.movable) {
-            this.update();
+            if (!this.update()) {
+                return false;
+            }
         }
-        if (this.lastTime <= 0) {
-            this.finish();
-        }
+        return this.lastTime > 0;
     };
 
     //弹幕生命周期结束
@@ -193,6 +194,7 @@ var CommentObject = (function () {
 
     //弹幕刷新动画
     CommentObject.prototype.update = function () {
+        return true;
     };
 
     //弹幕排布方法
