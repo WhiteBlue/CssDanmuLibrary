@@ -189,6 +189,20 @@ function CommentManager(stage) {
     this.height = stage.offsetHeight;
     this.timer = null;
 
+
+    //同屏队列插入新元素并重排序
+    this.nowLinePush = function (cmtObj) {
+        this.nowLine.push(cmtObj);
+        //重新整理
+        this.nowLine.sort(function (a, b) {
+            if (a.y >= b.y) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+    };
+
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
@@ -222,8 +236,8 @@ function CommentManager(stage) {
     //在当前队列插入弹幕
     this.send = function (data) {
         var cmt;
-        if (data.mode === 5) {
-            cmt = new TopPositionComment(this, data);
+        if (data.mode === 5 || data.mode === 4) {
+            cmt = new StaticComment(this, data);
         } else {
             //cmt = new CommentObject(this, data);
             return;
@@ -253,15 +267,9 @@ function CommentManager(stage) {
         //dom插入
         this.stage.appendChild(cmt.dom);
 
-        this.nowLine.push(cmt);
-        this.nowLine.sort(function (a, b) {
-            if (a.y >= b.y) {
-                return 1;
-            } else {
-                return -1;
-            }
-        });
         cmt.layout();
+
+        this.nowLinePush(cmt);
     };
 
     //跳转到指定时间
@@ -333,6 +341,7 @@ function CommentManager(stage) {
  */
 
 // @todo 重叠判定
+//全局使用相对坐标
 var CommentObject = (function () {
     function CommentObject(manager, init) {
         this.align = 0;
@@ -372,13 +381,16 @@ var CommentObject = (function () {
         }
     }
 
+    //取得/设置相对x轴坐标
     Object.defineProperty(CommentObject.prototype, "x", {
         get: function () {
             if (this._x === null || this._x === undefined) {
                 if (this.align % 2 === 0) {
-                    this._x = this.dom.offsetLeft;
+                    //左对齐
+                    this._x = this.dom.offsetLeft - this.manager.stage.offsetLeft;
                 } else {
-                    this._x = this.parent.width - this.dom.offsetLeft - this.width;
+                    //右对齐
+                    this._x = this.manager.stage.offsetWidth - (this.dom.offsetLeft - this.manager.stage.offsetLeft + this.dom.offsetWidth);
                 }
             }
             return this._x;
@@ -395,13 +407,15 @@ var CommentObject = (function () {
         configurable: true
     });
 
+    //取得/设置相对y轴坐标
     Object.defineProperty(CommentObject.prototype, "y", {
         get: function () {
             if (this._y === null || this._y === undefined) {
                 if (this.align < 2) {
+                    //上对齐
                     this._y = this.dom.offsetTop;
                 } else {
-                    this._y = this.parent.height - this.dom.offsetTop - this.height;
+                    this._y = this.manager.stage.offsetHeight - (this.dom.offsetTop + this.dom.offsetHeight);
                 }
             }
             return this._y;
@@ -411,7 +425,7 @@ var CommentObject = (function () {
             if (this.align < 2) {
                 this.dom.style.top = this._y + "px";
             } else {
-                this.dom.style.bottom = this._y + "px";
+                this.dom.style.top = (this.manager.stage.offsetHeight - y - this.dom.offsetHeight) + "px";
             }
         },
         enumerable: true,
@@ -530,21 +544,21 @@ var CommentObject = (function () {
  * Created by WhiteBlue on 16/2/10.
  */
 
-//@todo 待完成
-var TopPositionComment = (function (_super) {
-    __extends(TopPositionComment, _super);
+var StaticComment = (function (_super) {
+    __extends(StaticComment, _super);
 
-    function TopPositionComment(manager, init) {
+    function StaticComment(manager, init) {
         _super.call(this, manager, init);
+        this.align = (this.mode == 4) ? 3 : 0;
     }
 
-    TopPositionComment.prototype._findOffsetY = function (index, channel, offset) {
-        var preY = this.manager.stage.offsetTop + offset;
-        if (this.manager.nowLine.length == 1) {
-            return preY;
-        }
+    //寻找适合offsetY
+    StaticComment.prototype._findOffsetY = function (index, channel, offset) {
+        //取得起始位置(区别对齐方式)
+        var preY = offset;
         for (var i = 0; i < this.manager.nowLine.length; i++) {
             var cmObj = this.manager.nowLine[i];
+            //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
                 if (cmObj.y - preY >= channel) {
                     return cmObj.y;
@@ -553,13 +567,14 @@ var TopPositionComment = (function (_super) {
                 }
             }
         }
-        if (preY + channel <= (this.manager.stage.offsetTop + this.manager.stage.offsetHeight)) {
+        if (preY + channel <= this.manager.stage.offsetHeight) {
             return preY;
         }
         return -1;
     };
 
-    TopPositionComment.prototype.layout = function () {
+    //弹幕坐标适配(已插入真实dom)
+    StaticComment.prototype.layout = function () {
         var index = 0;
         var channel = this.size + 2 * this.manager.options.margin;
         var offset = 0;
@@ -574,11 +589,11 @@ var TopPositionComment = (function (_super) {
             index++;
             offset += 12;
         }
-        this.index = index-1;
+        this.index = index - 1;
         this.x = this.manager.stage.offsetLeft + (this.manager.stage.offsetWidth - this.width) / 2;
         this.y = insertY;
     };
 
-    return TopPositionComment;
+    return StaticComment;
 })(CommentObject);
 

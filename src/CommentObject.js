@@ -3,6 +3,7 @@
  */
 
 // @todo 重叠判定
+//全局使用相对坐标
 var CommentObject = (function () {
     function CommentObject(manager, init) {
         this.align = 0;
@@ -42,13 +43,16 @@ var CommentObject = (function () {
         }
     }
 
+    //取得/设置相对x轴坐标
     Object.defineProperty(CommentObject.prototype, "x", {
         get: function () {
             if (this._x === null || this._x === undefined) {
                 if (this.align % 2 === 0) {
-                    this._x = this.dom.offsetLeft;
+                    //左对齐
+                    this._x = this.dom.offsetLeft - this.manager.stage.offsetLeft;
                 } else {
-                    this._x = this.parent.width - this.dom.offsetLeft - this.width;
+                    //右对齐
+                    this._x = this.manager.stage.offsetWidth - (this.dom.offsetLeft - this.manager.stage.offsetLeft + this.dom.offsetWidth);
                 }
             }
             return this._x;
@@ -65,13 +69,15 @@ var CommentObject = (function () {
         configurable: true
     });
 
+    //取得/设置相对y轴坐标
     Object.defineProperty(CommentObject.prototype, "y", {
         get: function () {
             if (this._y === null || this._y === undefined) {
                 if (this.align < 2) {
+                    //上对齐
                     this._y = this.dom.offsetTop;
                 } else {
-                    this._y = this.parent.height - this.dom.offsetTop - this.height;
+                    this._y = this.manager.stage.offsetHeight - (this.dom.offsetTop + this.dom.offsetHeight);
                 }
             }
             return this._y;
@@ -81,7 +87,7 @@ var CommentObject = (function () {
             if (this.align < 2) {
                 this.dom.style.top = this._y + "px";
             } else {
-                this.dom.style.bottom = this._y + "px";
+                this.dom.style.top = (this.manager.stage.offsetHeight - y - this.dom.offsetHeight) + "px";
             }
         },
         enumerable: true,

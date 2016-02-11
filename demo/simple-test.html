@@ -48,10 +48,14 @@
 
         cm.init();
 
-        cm.start();
+//        cm.start();
 
-        for (var i = 0; i < 25; i++) {
+        for (var i = 0; i < 15; i++) {
             cm.send({mode: 5, text: "第" + i + "个顶部弹幕"});
+        }
+
+        for (var j = 0; j < 15; j++) {
+            cm.send({mode: 4, text: "第" + j + "个底部弹幕", align: 3});
         }
 
 //        CommentLoader('http://comment.bilibili.cn/5953559.xml', cm);

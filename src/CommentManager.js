@@ -17,6 +17,20 @@ function CommentManager(stage) {
     this.height = stage.offsetHeight;
     this.timer = null;
 
+
+    //同屏队列插入新元素并重排序
+    this.nowLinePush = function (cmtObj) {
+        this.nowLine.push(cmtObj);
+        //重新整理
+        this.nowLine.sort(function (a, b) {
+            if (a.y >= b.y) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+    };
+
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
@@ -50,8 +64,8 @@ function CommentManager(stage) {
     //在当前队列插入弹幕
     this.send = function (data) {
         var cmt;
-        if (data.mode === 5) {
-            cmt = new TopPositionComment(this, data);
+        if (data.mode === 5 || data.mode === 4) {
+            cmt = new StaticComment(this, data);
         } else {
             //cmt = new CommentObject(this, data);
             return;
@@ -81,15 +95,9 @@ function CommentManager(stage) {
         //dom插入
         this.stage.appendChild(cmt.dom);
 
-        this.nowLine.push(cmt);
-        this.nowLine.sort(function (a, b) {
-            if (a.y >= b.y) {
-                return 1;
-            } else {
-                return -1;
-            }
-        });
         cmt.layout();
+
+        this.nowLinePush(cmt);
     };
 
     //跳转到指定时间
