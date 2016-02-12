@@ -80,7 +80,7 @@ function CommentManager(stage) {
         if (data.mode === 5 || data.mode === 4) {
             cmt = new StaticComment(this, data);
         } else if (data.mode === 1 || data.mode === 2) {
-            cmt = new CSSScrollComment(this, data);
+            cmt = new ScrollComment(this, data);
         } else {
             return;
         }
