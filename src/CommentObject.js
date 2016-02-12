@@ -11,9 +11,7 @@ var CommentObject = (function () {
         this.mode = 1;
         this.stime = 0;
         this.text = "";
-        this.timeLeft = 4000;
         this.lifeTime = 4000;
-        this.movable = false;
         this._size = 25;
         this._color = 0xffffff;
         this.manager = manager;
@@ -49,10 +47,8 @@ var CommentObject = (function () {
         get: function () {
             if (this._x === null || this._x === undefined) {
                 if (this.align % 2 === 0) {
-                    //左对齐
                     this._x = this.dom.offsetLeft - this.manager.stage.offsetLeft;
                 } else {
-                    //右对齐
                     this._x = this.manager.stage.offsetWidth - (this.dom.offsetLeft - this.manager.stage.offsetLeft + this.dom.offsetWidth);
                 }
             }
@@ -75,10 +71,8 @@ var CommentObject = (function () {
         get: function () {
             if (this._y === null || this._y === undefined) {
                 if (this.align < 2) {
-                    //上对齐
                     this._y = this.dom.offsetTop;
                 } else {
-                    //下对齐
                     this._y = this.manager.stage.offsetHeight - (this.dom.offsetTop + this.dom.offsetHeight);
                 }
             }
@@ -174,26 +168,10 @@ var CommentObject = (function () {
     };
 
     //更新时间
-    CommentObject.prototype.time = function (time) {
-        this.timeLeft -= time;
-        if (this.timeLeft < 0) {
-            this.timeLeft = 0;
-        }
-        if (this.movable) {
-            //运动弹幕
-            if (!this.update()) {
-                return false;
-            }
-        }
-        return this.timeLeft > 0;
+    CommentObject.prototype.checkTime = function (nowTime) {
+        return (this.stime + this.lifeTime) > nowTime;
     };
 
-
-    //弹幕状态刷新
-    CommentObject.prototype.update = function () {
-        //返回生命周期是否结束
-        return true;
-    };
 
     //弹幕排布方法
     CommentObject.prototype.layout = function () {

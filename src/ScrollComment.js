@@ -21,7 +21,6 @@ var ScrollComment = (function (_super) {
                 this.align = 1;
                 break;
         }
-        this.movable = true;
         this.follow = false;
     }
 
@@ -50,6 +49,13 @@ var ScrollComment = (function (_super) {
         return -1;
     };
 
+    ScrollComment.prototype.transformCSS = function (trans) {
+        this.dom.style.transform = trans;
+        this.dom.style["webkitTransform"] = trans;
+        this.dom.style["msTransform"] = trans;
+        this.dom.style["oTransform"] = trans;
+    };
+
     ScrollComment.prototype.layout = function () {
         var index = 0;
         var channel = this.size + 2 * this.manager.options.margin;
@@ -57,87 +63,27 @@ var ScrollComment = (function (_super) {
         var insertY = -1;
 
         while (insertY < 0) {
-            if (index > 10) {
-                console.error('too many loops...');
-                return;
-            }
+            //if (index > 1000) {
+            //    console.error('Whoops!! too many loops ...');
+            //    return;
+            //}
             insertY = this._findOffsetY(index, channel, offset);
             index++;
-            offset += 12;
+            offset += this.manager.options.indexOffset;
         }
         this.index = index - 1;
         this.x = this.manager.width;
         this.y = insertY;
+
+        var dx = -this.manager.width - this.width;
+
+        this.move(dx);
     };
 
-    ScrollComment.prototype.update = function () {
-        var preX = (this.timeLeft / this.lifeTime) * (this.manager.width + this.width) - this.width;
-        this.x = preX;
-        return preX > -this.width;
+    ScrollComment.prototype.move = function (dx) {
+        this.transformCSS("translateX(" + dx + "px)");
+        this.dom.style.transition = "transform " + this.lifeTime + "ms linear";
     };
 
     return ScrollComment;
 })(CommentObject);
-
-
-
-var CSSScrollComment = (function (_super) {
-    __extends(CSSScrollComment, _super);
-    function CSSScrollComment() {
-        _super.apply(this, arguments);
-        this._dirtyCSS = true;
-    }
-
-    Object.defineProperty(CSSScrollComment.prototype, "x", {
-        get: function () {
-            return (this.timeLeft / this.lifeTime) * (this.manager.width + this.width) - this.width;
-        },
-        set: function (x) {
-            if (typeof this._x === "number") {
-                var dx = x - this._x;
-                this._x = x;
-                this.transformCSS("translateX(" + dx + "px)");
-            } else {
-                this._x = x;
-                if (this.align % 2 === 0) {
-                    this.dom.style.left = this._x + "px";
-                } else {
-                    this.dom.style.right = this._x + "px";
-                }
-            }
-        },
-        enumerable: true,
-        configurable: true
-    });
-
-    CSSScrollComment.prototype.update = function () {
-        if (this._dirtyCSS) {
-            this.dom.style.transition = "transform " + this.timeLeft + "ms linear";
-            this.x = - this.width;
-            this._dirtyCSS = false;
-        }
-        return this.x > -this.width;
-    };
-
-    CSSScrollComment.prototype.transformCSS = function (trans) {
-        this.dom.style.transform = trans;
-        this.dom.style["webkitTransform"] = trans;
-        this.dom.style["msTransform"] = trans;
-        this.dom.style["oTransform"] = trans;
-    };
-
-
-    CSSScrollComment.prototype.invalidate = function () {
-        _super.prototype.invalidate.call(this);
-        this._dirtyCSS = true;
-    };
-
-    CSSScrollComment.prototype.stop = function () {
-        this.dom.style.transition = "";
-        this.x = this._x;
-        this._x = null;
-        this.x = (this.timeLeft / this.lifeTime) * (this.parent.width + this.width) - this.width;
-        this._dirtyCSS = true;
-    };
-    return CSSScrollComment;
-})(ScrollComment);
