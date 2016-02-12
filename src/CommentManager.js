@@ -82,6 +82,7 @@ function CommentManager(stage) {
             cmt = new ScrollComment(this, data);
         } else {
             console.log('不支持弹幕类型:' + data.mode);
+            return;
         }
 
         //执行初始化,创建node
