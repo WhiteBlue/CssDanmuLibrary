@@ -19,17 +19,42 @@ function CommentManager(stage) {
     this.timer = null;
 
 
-    //同屏队列插入新元素并重排序
+    //同屏队列适当位置插入新元素
     this.nowLinePush = function (pushCmt) {
-        this.nowLine.push(pushCmt);
-        //重新整理
-        this.nowLine.sort(function (a, b) {
-            if (a.y >= b.y) {
-                return 1;
-            } else {
-                return -1;
+        if (this.nowLine.length === 0) {
+            this.nowLine.push(pushCmt);
+            return;
+        }
+
+        if (this.nowLine[this.nowLine.length - 1].y <= pushCmt.y) {
+            this.nowLine.push(pushCmt);
+            return;
+        }
+
+        if (this.nowLine[0].y >= pushCmt.y) {
+            this.nowLine.unshift(pushCmt);
+            return;
+        }
+
+        var low = 0;
+        var high = this.nowLine.length - 1;
+
+        var i = 0;
+        var insertIndex = 0;
+
+        while (low < high) {
+            i = Math.floor((high + low + 1) / 2);
+            if (this.nowLine[i - 1].y <= pushCmt.y && this.nowLine[i].y >= pushCmt.y) {
+                insertIndex = i;
+                break;
             }
-        });
+            if (this.nowLine[i - 1].y > pushCmt.y) {
+                high = i - 1;
+            } else {
+                low = i;
+            }
+        }
+        this.nowLine.splice(insertIndex, 0, pushCmt);
     };
 
     //同屏队列移除元素并重排序
@@ -38,13 +63,6 @@ function CommentManager(stage) {
         if (index >= 0) {
             this.nowLine.splice(index, 1);
         }
-        this.nowLine.sort(function (a, b) {
-            if (a.y >= b.y) {
-                return 1;
-            } else {
-                return -1;
-            }
-        });
     };
 
     this.setBounds = function () {
