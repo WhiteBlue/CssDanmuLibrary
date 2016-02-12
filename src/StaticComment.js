@@ -42,13 +42,13 @@ var StaticComment = (function (_super) {
         var insertY = -1;
 
         while (insertY < 0) {
-            if (index > 10) {
-                console.error('too many loops...');
+            if (index > 60) {
+                console.error('Whoops!! too many danmu ...');
                 return;
             }
             insertY = this._findOffsetY(index, channel, offset);
             index++;
-            offset += 12;
+            offset += this.manager.options.indexOffset;
         }
 
         this.index = index - 1;

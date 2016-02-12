@@ -6,8 +6,9 @@ function CommentManager(stage) {
     this.stage = stage;
     this.options = {
         className: "cmt",
+        indexOffset: 0,        //弹幕层偏移
         margin: 2,
-        fresh: 10       //刷新频率
+        fresh: 10               //刷新频率
     };
     this.commentLine = [];      //总弹幕队列
     this.nowLine = [];          //当前播放弹幕
@@ -78,8 +79,8 @@ function CommentManager(stage) {
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
             cmt = new StaticComment(this, data);
-        } else if (data.mode === 1 || data.mode === 2 || data.mode === 6) {
-            cmt = new ScrollComment(this, data);
+        } else if (data.mode === 1 || data.mode === 2) {
+            cmt = new CSSScrollComment(this, data);
         } else {
             console.log('不支持弹幕类型:' + data.mode);
             return;

@@ -441,18 +441,8 @@ var ScrollComment = (function (_super) {
     return ScrollComment;
 })(CoreComment);
 
-var CSSCompatLayer = (function () {
-    function CSSCompatLayer() {
-    }
 
-    CSSCompatLayer.prototype.transform = function (dom, trans) {
-        dom.style.transform = trans;
-        dom.style["webkitTransform"] = trans;
-        dom.style["msTransform"] = trans;
-        dom.style["oTransform"] = trans;
-    };
-    return CSSCompatLayer;
-})();
+
 
 var CSSScrollComment = (function (_super) {
     __extends(CSSScrollComment, _super);
@@ -469,7 +459,7 @@ var CSSScrollComment = (function (_super) {
             if (typeof this._x === "number") {
                 var dx = x - this._x;
                 this._x = x;
-                CSSCompatLayer.transform(this.dom, "translateX(" + dx + "px)");
+                this.transformCSS( "translateX(" + dx + "px)");
             } else {
                 this._x = x;
                 if (!this.absolute) {
@@ -492,6 +482,14 @@ var CSSScrollComment = (function (_super) {
             this._dirtyCSS = false;
         }
     };
+
+    CSSScrollComment.prototype.transformCSS = function (trans) {
+        this.dom.style.transform = trans;
+        this.dom.style["webkitTransform"] = trans;
+        this.dom.style["msTransform"] = trans;
+        this.dom.style["oTransform"] = trans;
+    };
+
 
     CSSScrollComment.prototype.invalidate = function () {
         _super.prototype.invalidate.call(this);

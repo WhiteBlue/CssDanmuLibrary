@@ -164,7 +164,6 @@ var CommentManager = (function () {
     };
 
 
-    //@todo: time是什么到底
     CommentManager.prototype.time = function (time) {
         //注 : time是时间间隔
         time = time - 1;
@@ -182,8 +181,7 @@ var CommentManager = (function () {
         for (; this.position < this.timeline.length; this.position++) {
             if (this.timeline[this.position]['stime'] <= time) {
                 //发送弹幕
-                console.log(this.timeline[this.position]);
-                //this.send(this.timeline[this.position]);
+                this.send(this.timeline[this.position]);
             } else {
                 //弹幕开始时间超过当前时间 , 结束循环
                 break;
