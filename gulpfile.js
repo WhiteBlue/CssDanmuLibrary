@@ -45,9 +45,12 @@ gulp.task('watchcss', function () {
 gulp.task('concat_ccl', function () {
     gulp.src('src_ccl/*.js')
         .pipe(concat('app.js'))
+        .pipe(uglify())
+        .pipe(jshint())
         .pipe(gulp.dest('dest_ccl/js'));
     gulp.src('src_ccl/css/*.css')
         .pipe(concat('main.css'))
+        .pipe(cssnano())
         .pipe(gulp.dest('dest_ccl/css'));
 });
 
