@@ -10,24 +10,31 @@ var ScrollComment = (function (_super) {
 
     function ScrollComment(manager, init) {
         _super.call(this, manager, init);
-        this.align = (this.mode == 2) ? 3 : 0;
+        switch(this.mode){
+            case 1:this.align=0;break;
+            case 2:this.align=3;break;
+            case 6:this.align=1;break;
+        }
         this.movable = true;
+        this.follow = false;
     }
 
     ScrollComment.prototype._findOffsetY = function (index, channel, offset) {
+        var cmObj;
         //取得起始位置(区别对齐方式)
         var preY = offset;
-        for (var i = 0; i < this.manager.nowLine.length; i++) {
-            var cmObj = this.manager.nowLine[i];
+        for (i = 0; i < this.manager.nowLine.length; i++) {
+            cmObj = this.manager.nowLine[i];
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
                 if (cmObj.y - preY >= channel) {
                     return preY;
                 }
-                ////弹幕无碰撞,同channel插入
-                //if (cmObj.stime + cmObj.lastTime <= this.stime + this.lastTime / 2) {
-                //    return cmObj.y;
-                //}
+                //弹幕无碰撞
+                if (!cmObj.follow && (cmObj.timeLeft <= (cmObj.lifeTime * 3 / 4))) {
+                    cmObj.follow = true;
+                    return cmObj.y;
+                }
                 preY = cmObj.y + cmObj.height;
             }
         }
@@ -58,7 +65,7 @@ var ScrollComment = (function (_super) {
     };
 
     ScrollComment.prototype.update = function () {
-        var preX = (this.lastTime / this.lifeTime) * (this.manager.width + this.width) - this.width;
+        var preX = (this.timeLeft / this.lifeTime) * (this.manager.width + this.width) - this.width;
         this.x = preX;
         return preX > -this.width;
 

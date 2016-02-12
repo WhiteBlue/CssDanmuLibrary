@@ -221,9 +221,6 @@ function CommentManager(stage) {
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
-
-        this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
-        this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
     };
 
     this.init = function () {
@@ -253,8 +250,10 @@ function CommentManager(stage) {
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
             cmt = new StaticComment(this, data);
-        } else if (data.mode === 1 || data.mode === 2) {
+        } else if (data.mode === 1 || data.mode === 2 || data.mode === 6) {
             cmt = new ScrollComment(this, data);
+        } else {
+            console.log('不支持弹幕类型:' + data.mode);
         }
 
         //执行初始化,创建node
@@ -341,16 +340,16 @@ function CommentManager(stage) {
     //清除舞台
     this.clear = function () {
         while (this.nowLine.length > 0) {
-            this.nowLine[0].finish();
+            this.remove(this.nowLine[0]);
         }
     };
 }
 /**
  * Created by WhiteBlue on 16/2/9.
+ *
+ * 基本弹幕对象
  */
 
-// @todo 重叠判定
-//全局使用相对坐标
 var CommentObject = (function () {
     function CommentObject(manager, init) {
         this.align = 0;
@@ -358,7 +357,7 @@ var CommentObject = (function () {
         this.mode = 1;
         this.stime = 0;
         this.text = "";
-        this.lastTime = 4000;
+        this.timeLeft = 4000;
         this.lifeTime = 4000;
         this.movable = false;
         this._size = 25;
@@ -522,25 +521,23 @@ var CommentObject = (function () {
 
     //更新时间
     CommentObject.prototype.time = function (time) {
-        this.lastTime -= time;
-        if (this.lastTime < 0) {
-            this.lastTime = 0;
+        this.timeLeft -= time;
+        if (this.timeLeft < 0) {
+            this.timeLeft = 0;
         }
         if (this.movable) {
+            //运动弹幕
             if (!this.update()) {
                 return false;
             }
         }
-        return this.lastTime > 0;
+        return this.timeLeft > 0;
     };
 
-    //弹幕生命周期结束
-    CommentObject.prototype.finish = function () {
-        this.manager.remove(this);
-    };
 
-    //弹幕刷新动画
+    //弹幕状态刷新
     CommentObject.prototype.update = function () {
+        //返回生命周期是否结束
         return true;
     };
 
@@ -565,24 +562,31 @@ var ScrollComment = (function (_super) {
 
     function ScrollComment(manager, init) {
         _super.call(this, manager, init);
-        this.align = (this.mode == 2) ? 3 : 0;
+        switch(this.mode){
+            case 1:this.align=0;break;
+            case 2:this.align=3;break;
+            case 6:this.align=1;break;
+        }
         this.movable = true;
+        this.follow = false;
     }
 
     ScrollComment.prototype._findOffsetY = function (index, channel, offset) {
+        var cmObj;
         //取得起始位置(区别对齐方式)
         var preY = offset;
-        for (var i = 0; i < this.manager.nowLine.length; i++) {
-            var cmObj = this.manager.nowLine[i];
+        for (i = 0; i < this.manager.nowLine.length; i++) {
+            cmObj = this.manager.nowLine[i];
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
                 if (cmObj.y - preY >= channel) {
                     return preY;
                 }
-                ////弹幕无碰撞,同channel插入
-                //if (cmObj.stime + cmObj.lastTime <= this.stime + this.lastTime / 2) {
-                //    return cmObj.y;
-                //}
+                //弹幕无碰撞
+                if (!cmObj.follow && (cmObj.timeLeft <= (cmObj.lifeTime * 3 / 4))) {
+                    cmObj.follow = true;
+                    return cmObj.y;
+                }
                 preY = cmObj.y + cmObj.height;
             }
         }
@@ -613,7 +617,7 @@ var ScrollComment = (function (_super) {
     };
 
     ScrollComment.prototype.update = function () {
-        var preX = (this.lastTime / this.lifeTime) * (this.manager.width + this.width) - this.width;
+        var preX = (this.timeLeft / this.lifeTime) * (this.manager.width + this.width) - this.width;
         this.x = preX;
         return preX > -this.width;
 

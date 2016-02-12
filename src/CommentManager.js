@@ -49,9 +49,6 @@ function CommentManager(stage) {
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
-
-        this.stage.style.perspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
-        this.stage.style.webkitPerspective = this.width * Math.tan(40 * Math.PI / 180) / 2 + "px";
     };
 
     this.init = function () {
@@ -81,8 +78,10 @@ function CommentManager(stage) {
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
             cmt = new StaticComment(this, data);
-        } else if (data.mode === 1 || data.mode === 2) {
+        } else if (data.mode === 1 || data.mode === 2 || data.mode === 6) {
             cmt = new ScrollComment(this, data);
+        } else {
+            console.log('不支持弹幕类型:' + data.mode);
         }
 
         //执行初始化,创建node
@@ -169,7 +168,7 @@ function CommentManager(stage) {
     //清除舞台
     this.clear = function () {
         while (this.nowLine.length > 0) {
-            this.nowLine[0].finish();
+            this.remove(this.nowLine[0]);
         }
     };
 }

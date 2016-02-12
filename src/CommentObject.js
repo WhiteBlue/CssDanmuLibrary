@@ -1,9 +1,9 @@
 /**
  * Created by WhiteBlue on 16/2/9.
+ *
+ * 基本弹幕对象
  */
 
-// @todo 重叠判定
-//全局使用相对坐标
 var CommentObject = (function () {
     function CommentObject(manager, init) {
         this.align = 0;
@@ -11,7 +11,7 @@ var CommentObject = (function () {
         this.mode = 1;
         this.stime = 0;
         this.text = "";
-        this.lastTime = 4000;
+        this.timeLeft = 4000;
         this.lifeTime = 4000;
         this.movable = false;
         this._size = 25;
@@ -175,25 +175,23 @@ var CommentObject = (function () {
 
     //更新时间
     CommentObject.prototype.time = function (time) {
-        this.lastTime -= time;
-        if (this.lastTime < 0) {
-            this.lastTime = 0;
+        this.timeLeft -= time;
+        if (this.timeLeft < 0) {
+            this.timeLeft = 0;
         }
         if (this.movable) {
+            //运动弹幕
             if (!this.update()) {
                 return false;
             }
         }
-        return this.lastTime > 0;
+        return this.timeLeft > 0;
     };
 
-    //弹幕生命周期结束
-    CommentObject.prototype.finish = function () {
-        this.manager.remove(this);
-    };
 
-    //弹幕刷新动画
+    //弹幕状态刷新
     CommentObject.prototype.update = function () {
+        //返回生命周期是否结束
         return true;
     };
 
