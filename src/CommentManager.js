@@ -82,7 +82,6 @@ function CommentManager(stage) {
         } else if (data.mode === 1 || data.mode === 2) {
             cmt = new CSSScrollComment(this, data);
         } else {
-            console.log('不支持弹幕类型:' + data.mode);
             return;
         }
 
