@@ -7,7 +7,7 @@ function CommentManager(stage) {
     this.options = {
         className: "cmt",
         indexOffset: 0,        //弹幕层偏移
-        margin: 2,
+        margin: 1,
         fresh: 10               //刷新频率
     };
     this.commentLine = [];      //总弹幕队列
@@ -26,32 +26,50 @@ function CommentManager(stage) {
     };
 
 
-    //同屏队列插入新元素并重排序
+    //同屏队列适当位置插入新元素
     this.nowLinePush = function (pushCmt) {
-        this.nowLine.push(pushCmt);
-        //重新整理
-        this.nowLine.sort(function (a, b) {
-            if (a.y >= b.y) {
-                return 1;
-            } else {
-                return -1;
+        if (this.nowLine.length === 0) {
+            this.nowLine.push(pushCmt);
+            return;
+        }
+
+        if (this.nowLine[this.nowLine.length - 1].y <= pushCmt.y) {
+            this.nowLine.push(pushCmt);
+            return;
+        }
+
+        if (this.nowLine[0].y >= pushCmt.y) {
+            this.nowLine.unshift(pushCmt);
+            return;
+        }
+
+        var low = 0;
+        var high = this.nowLine.length - 1;
+
+        var i = 0;
+        var insertIndex = 0;
+
+        while (low < high) {
+            i = Math.floor((high + low + 1) / 2);
+            if (this.nowLine[i - 1].y <= pushCmt.y && this.nowLine[i].y >= pushCmt.y) {
+                insertIndex = i;
+                break;
             }
-        });
+            if (this.nowLine[i - 1].y > pushCmt.y) {
+                high = i - 1;
+            } else {
+                low = i;
+            }
+        }
+        this.nowLine.splice(insertIndex, 0, pushCmt);
     };
 
-    //同屏队列移除元素并重排序
+    //同屏队列移除元素
     this.nowLineRemove = function (removeCmt) {
         var index = this.nowLine.indexOf(removeCmt);
         if (index >= 0) {
             this.nowLine.splice(index, 1);
         }
-        this.nowLine.sort(function (a, b) {
-            if (a.y >= b.y) {
-                return 1;
-            } else {
-                return -1;
-            }
-        });
     };
 
     this.setBounds = function () {
@@ -65,11 +83,6 @@ function CommentManager(stage) {
 
     //插入弹幕
     this.send = function (data) {
-        if (this.nowLine.length > 500) {
-            console.log('too more danmu...');
-            return;
-        }
-
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
             cmt = new StaticComment(this, data);

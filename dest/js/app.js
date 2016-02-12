@@ -1,6 +1,689 @@
-var __extends=function(t,o){var r=function(){};r.prototype=o.prototype;var n=new r;n.constructor=t,t.prototype=n};
-function BilibiliParser(a){function e(a){return a.replace(/\t/,"\\t")}for(var t=a.getElementsByTagName("d"),r=[],o=0;o<t.length;o++)if(null!=t[o].getAttribute("p")){var n=t[o].getAttribute("p").split(",");if(!t[o].childNodes[0])continue;var l=t[o].childNodes[0].nodeValue,d={};if(d.stime=Math.round(1e3*parseFloat(n[0])),d.mode=parseInt(n[1]),d.size=parseInt(n[2]),d.color=parseInt(n[3]),d.date=parseInt(n[4]),d.pool=parseInt(n[5]),d.position="absolute",null!=n[7]&&(d.dbid=parseInt(n[7])),d.hash=n[6],d.border=!1,d.mode<7)d.text=l.replace(/(\/n|\\n|\n|\r\n)/g,"\n");else if(7==d.mode)try{if(adv=JSON.parse(e(l)),d.shadow=!0,d.x=parseFloat(adv[0]),d.y=parseFloat(adv[1]),(Math.floor(d.x)<d.x||Math.floor(d.y)<d.y)&&(d.position="relative"),d.text=adv[4].replace(/(\/n|\\n|\n|\r\n)/g,"\n"),d.rZ=0,d.rY=0,adv.length>=7&&(d.rZ=parseInt(adv[5],10),d.rY=parseInt(adv[6],10)),d.motion=[],d.movable=!1,adv.length>=11){d.movable=!0;var s=500,p={x:{from:d.x,to:parseFloat(adv[7]),dur:s,delay:0},y:{from:d.y,to:parseFloat(adv[8]),dur:s,delay:0}};if(""!==adv[9]&&(s=parseInt(adv[9],10),p.x.dur=s,p.y.dur=s),""!==adv[10]&&(p.x.delay=parseInt(adv[10],10),p.y.delay=parseInt(adv[10],10)),adv.length>11&&(d.shadow=adv[11],"true"===d.shadow&&(d.shadow=!0),"false"===d.shadow&&(d.shadow=!1),null!=adv[12]&&(d.font=adv[12]),adv.length>14)){"relative"===d.position&&(console.log("Cannot mix relative and absolute positioning"),d.position="absolute");for(var i=adv[14],v={x:p.x.from,y:p.y.from},u=[],h=new RegExp("([a-zA-Z])\\s*(\\d+)[, ](\\d+)","g"),c=i.split(/[a-zA-Z]/).length-1,f=h.exec(i);null!==f;){switch(f[1]){case"M":v.x=parseInt(f[2],10),v.y=parseInt(f[3],10);break;case"L":u.push({x:{from:v.x,to:parseInt(f[2],10),dur:s/c,delay:0},y:{from:v.y,to:parseInt(f[3],10),dur:s/c,delay:0}}),v.x=parseInt(f[2],10),v.y=parseInt(f[3],10)}f=h.exec(i)}p=null,d.motion=u}null!==p&&d.motion.push(p)}d.dur=2500,adv[3]<12&&(d.dur=1e3*adv[3]);var g=adv[2].split("-");if(null!=g&&g.length>1){var x=parseFloat(g[0]),y=parseFloat(g[1]);d.opacity=x,x!==y&&(d.alpha={from:x,to:y})}}catch(m){console.log("[Err] Error occurred in JSON parsing"),console.log("[Dbg] "+l)}else 8==d.mode&&(d.code=l);null!=d.text&&(d.text=d.text.replace(/\u25a0/g,"█")),r.push(d)}return r}
-function CommentManager(t){this.stage=t,this.options={className:"cmt",indexOffset:0,margin:2,fresh:10},this.commentLine=[],this.nowLine=[],this.position=0,this.width=t.offsetWidth,this.height=t.offsetHeight,this.startTimer=function(){},this.stopTimer=function(){},this.nowLinePush=function(t){this.nowLine.push(t),this.nowLine.sort(function(t,i){return t.y>=i.y?1:-1})},this.nowLineRemove=function(t){var i=this.nowLine.indexOf(t);i>=0&&this.nowLine.splice(i,1),this.nowLine.sort(function(t,i){return t.y>=i.y?1:-1})},this.setBounds=function(){this.width=this.stage.offsetWidth,this.height=this.stage.offsetHeight},this.init=function(){this.setBounds()},this.send=function(t){if(this.nowLine.length>500)return void console.log("too more danmu...");var i;if(5===t.mode||4===t.mode)i=new StaticComment(this,t);else{if(1!==t.mode&&2!==t.mode)return void console.log("不支持的弹幕");i=new ScrollComment(this,t)}i.init(),this.stage.appendChild(i.dom),i.layout(),this.nowLinePush(i)},this.seek=function(t){this.position=0,this.position=this.locate(t)},this.locate=function(t){for(var i=this.position;i<this.commentLine.length;i++){var n=this.commentLine[i];if(n.stime>=t)return i}return this.commentLine.length},this.time=function(t){if(t-=1,!(this.position>=this.commentLine.length)){for(var i=this.locate(t);this.position<i;this.position++)this.send(this.commentLine[this.position]);this.position=i;for(var n=this.nowLine.length,o=0;n>o;o++){var e=this.nowLine[o];e.checkTime(t)||(this.remove(e),n--)}}},this.load=function(t){this.commentLine=t,this.commentLine.sort(function(t,i){return t.stime>=i.stime?1:-1})},this.remove=function(t){this.nowLineRemove(t);try{this.stage.removeChild(t.dom)}catch(i){console.log(i),console.log(t)}},this.clear=function(){for(;this.nowLine.length>0;)this.remove(this.nowLine[0])}}
-var CommentObject=function(){function t(t,e){this.align=0,this.index=0,this.mode=1,this.stime=0,this.text="",this.lifeTime=4e3,this._size=25,this._color=16777215,this.manager=t,e.hasOwnProperty("align")&&(this.align=e.align),e.hasOwnProperty("stime")&&(this.stime=e.stime),e.hasOwnProperty("text")&&(this.text=e.text),e.hasOwnProperty("mode")&&(this.mode=e.mode),e.hasOwnProperty("color")&&(this._color=e.color),e.hasOwnProperty("size")&&(this._size=e.size),e.hasOwnProperty("x")&&(this._x=e.x),e.hasOwnProperty("y")&&(this._y=e.y)}return Object.defineProperty(t.prototype,"x",{get:function(){return(null===this._x||void 0===this._x)&&(this.align%2===0?this._x=this.dom.offsetLeft-this.manager.stage.offsetLeft:this._x=this.manager.stage.offsetWidth-(this.dom.offsetLeft-this.manager.stage.offsetLeft+this.dom.offsetWidth)),this._x},set:function(t){this._x=t,this.align%2===0?this.dom.style.left=this._x+"px":this.dom.style.right=this._x+"px"},enumerable:!0,configurable:!0}),Object.defineProperty(t.prototype,"y",{get:function(){return(null===this._y||void 0===this._y)&&(this.align<2?this._y=this.dom.offsetTop:this._y=this.manager.stage.offsetHeight-(this.dom.offsetTop+this.dom.offsetHeight)),this._y},set:function(t){this._y=t,this.align<2?this.dom.style.top=this._y+"px":this.dom.style.top=this.manager.stage.offsetHeight-t-this.dom.offsetHeight+"px"},enumerable:!0,configurable:!0}),Object.defineProperty(t.prototype,"color",{get:function(){return this._color},set:function(t){this._color=t;var e=t.toString(16);e=e.length>=6?e:new Array(6-e.length+1).join("0")+e,this.dom.style.color="#"+e,0===this._color&&(this.dom.className=this.manager.options.className+" rshadow")},enumerable:!0,configurable:!0}),Object.defineProperty(t.prototype,"width",{get:function(){return(null===this._width||void 0===this._width)&&(this._width=this.dom.offsetWidth),this._width},set:function(t){this._width=t,this.dom.style.width=this._width+"px"},enumerable:!0,configurable:!0}),Object.defineProperty(t.prototype,"height",{get:function(){return(null===this._height||void 0===this._height)&&(this._height=this.dom.offsetHeight),this._height},set:function(t){this._height=t,this.dom.style.height=this._height+"px"},enumerable:!0,configurable:!0}),Object.defineProperty(t.prototype,"size",{get:function(){return this._size},set:function(t){this._size=t,this.dom.style.fontSize=this._size+"px"},enumerable:!0,configurable:!0}),t.prototype.init=function(){var t=document.createElement("div");t.className=this.manager.options.className,t.appendChild(document.createTextNode(this.text)),t.textContent=this.text,t.innerText=this.text,this.dom=t,this.color=this._color,this.size=this._size},t.prototype.checkTime=function(t){return this.stime+this.lifeTime>t},t.prototype.layout=function(){},t}();
-var ScrollComment=function(t){function i(i,e){switch(t.call(this,i,e),this.mode){case 1:this.align=0;break;case 2:this.align=3;break;case 6:this.align=1}this.follow=!1}return __extends(i,t),i.prototype._findOffsetY=function(t,i,e){for(var s,n=e,o=0;o<this.manager.nowLine.length;o++)if(s=this.manager.nowLine[o],s.mode===this.mode&&s.index===t){if(s.y-n>=i)return n;if(!s.follow&&s.timeLeft<=3*s.lifeTime/4)return s.follow=!0,s.y;n=s.y+s.height}return n+i<=this.manager.stage.offsetHeight?n:-1},i.prototype.transformCSS=function(t){this.dom.style.transform=t,this.dom.style.webkitTransform=t,this.dom.style.msTransform=t,this.dom.style.oTransform=t},i.prototype.layout=function(){for(var t=0,i=this.size+2*this.manager.options.margin,e=0,s=-1;0>s;)s=this._findOffsetY(t,i,e),t++,e+=this.manager.options.indexOffset;this.index=t-1,this.x=this.manager.width,this.y=s;var n=-this.manager.width-this.width;this.move(n)},i.prototype.move=function(t){this.transformCSS("translateX("+t+"px)"),this.dom.style.transition="transform "+this.lifeTime+"ms linear"},i}(CommentObject);
-var StaticComment=function(t){function i(i,e){t.call(this,i,e),this.align=4==this.mode?3:0}return __extends(i,t),i.prototype._findOffsetY=function(t,i,e){for(var n=e,s=0;s<this.manager.nowLine.length;s++){var a=this.manager.nowLine[s];if(a.mode===this.mode&&a.index===t){if(a.y-n>=i)return n;n=a.y+a.height}}return n+i<=this.manager.stage.offsetHeight?n:-1},i.prototype.layout=function(){for(var t=0,i=this.size+2*this.manager.options.margin,e=0,n=-1;0>n;)n=this._findOffsetY(t,i,e),t++,e+=this.manager.options.indexOffset;this.index=t-1,this.x=this.manager.stage.offsetLeft+(this.manager.stage.offsetWidth-this.width)/2,this.y=n},i}(CommentObject);
+/**
+ * Created by WhiteBlue on 16/2/10.
+ */
+
+var __extends = function (SubType, SuperType) {
+    var __prototype = function () {
+    };
+    __prototype.prototype = SuperType.prototype;
+    var proto = new __prototype();
+    proto.constructor = SubType;
+    SubType.prototype = proto;
+};
+
+/**
+ * Bilibili Format Parser
+ * @license MIT License
+ * Takes in an XMLDoc/LooseXMLDoc and parses that into a Generic Comment List
+ **/
+function BilibiliParser(xmlDoc) {
+    function format(string) {
+        // Format the comment text to be JSON Valid.
+        return string.replace(/\t/, "\\t");
+    }
+    var elems = xmlDoc.getElementsByTagName('d');
+
+    var tlist = [];
+    for (var i = 0; i < elems.length; i++) {
+        if (elems[i].getAttribute('p') != null) {
+            var opt = elems[i].getAttribute('p').split(',');
+            if (!elems[i].childNodes[0])
+                continue;
+            var text = elems[i].childNodes[0].nodeValue;
+            var obj = {};
+            obj.stime = Math.round(parseFloat(opt[0]) * 1000);
+            obj.mode = parseInt(opt[1]);
+            obj.size = parseInt(opt[2]);
+            obj.color = parseInt(opt[3]);
+            obj.date = parseInt(opt[4]);
+            obj.pool = parseInt(opt[5]);
+            obj.position = "absolute";
+            if (opt[7] != null)
+                obj.dbid = parseInt(opt[7]);
+            obj.hash = opt[6];
+            obj.border = false;
+            if (obj.mode < 7) {
+                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "\n");
+            } else {
+                if (obj.mode == 7) {
+                    try {
+                        adv = JSON.parse(format(text));
+                        obj.shadow = true;
+                        obj.x = parseFloat(adv[0]);
+                        obj.y = parseFloat(adv[1]);
+                        if (Math.floor(obj.x) < obj.x || Math.floor(obj.y) < obj.y) {
+                            obj.position = "relative";
+                        }
+                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "\n");
+                        obj.rZ = 0;
+                        obj.rY = 0;
+                        if (adv.length >= 7) {
+                            obj.rZ = parseInt(adv[5], 10);
+                            obj.rY = parseInt(adv[6], 10);
+                        }
+                        obj.motion = [];
+                        obj.movable = false;
+                        if (adv.length >= 11) {
+                            obj.movable = true;
+                            var singleStepDur = 500;
+                            var motion = {
+                                x: {from: obj.x, to: parseFloat(adv[7]), dur: singleStepDur, delay: 0},
+                                y: {from: obj.y, to: parseFloat(adv[8]), dur: singleStepDur, delay: 0},
+                            };
+                            if (adv[9] !== '') {
+                                singleStepDur = parseInt(adv[9], 10);
+                                motion.x.dur = singleStepDur;
+                                motion.y.dur = singleStepDur;
+                            }
+                            if (adv[10] !== '') {
+                                motion.x.delay = parseInt(adv[10], 10);
+                                motion.y.delay = parseInt(adv[10], 10);
+                            }
+                            if (adv.length > 11) {
+                                obj.shadow = adv[11];
+                                if (obj.shadow === "true") {
+                                    obj.shadow = true;
+                                }
+                                if (obj.shadow === "false") {
+                                    obj.shadow = false;
+                                }
+                                if (adv[12] != null) {
+                                    obj.font = adv[12];
+                                }
+                                if (adv.length > 14) {
+                                    // Support for Bilibili Advanced Paths
+                                    if (obj.position === "relative") {
+                                        console.log("Cannot mix relative and absolute positioning");
+                                        obj.position = "absolute";
+                                    }
+                                    var path = adv[14];
+                                    var lastPoint = {x: motion.x.from, y: motion.y.from};
+                                    var pathMotion = [];
+                                    var regex = new RegExp("([a-zA-Z])\\s*(\\d+)[, ](\\d+)", "g");
+                                    var counts = path.split(/[a-zA-Z]/).length - 1;
+                                    var m = regex.exec(path);
+                                    while (m !== null) {
+                                        switch (m[1]) {
+                                            case "M":
+                                            {
+                                                lastPoint.x = parseInt(m[2], 10);
+                                                lastPoint.y = parseInt(m[3], 10);
+                                            }
+                                                break;
+                                            case "L":
+                                            {
+                                                pathMotion.push({
+                                                    "x": {
+                                                        "from": lastPoint.x,
+                                                        "to": parseInt(m[2], 10),
+                                                        "dur": singleStepDur / counts,
+                                                        "delay": 0
+                                                    },
+                                                    "y": {
+                                                        "from": lastPoint.y,
+                                                        "to": parseInt(m[3], 10),
+                                                        "dur": singleStepDur / counts,
+                                                        "delay": 0
+                                                    }
+                                                });
+                                                lastPoint.x = parseInt(m[2], 10);
+                                                lastPoint.y = parseInt(m[3], 10);
+                                            }
+                                                break;
+                                        }
+                                        m = regex.exec(path);
+                                    }
+                                    motion = null;
+                                    obj.motion = pathMotion;
+                                }
+                            }
+                            if (motion !== null) {
+                                obj.motion.push(motion);
+                            }
+                        }
+                        obj.dur = 2500;
+                        if (adv[3] < 12) {
+                            obj.dur = adv[3] * 1000;
+                        }
+                        var tmp = adv[2].split('-');
+                        if (tmp != null && tmp.length > 1) {
+                            var alphaFrom = parseFloat(tmp[0]);
+                            var alphaTo = parseFloat(tmp[1]);
+                            obj.opacity = alphaFrom;
+                            if (alphaFrom !== alphaTo) {
+                                obj.alpha = {from: alphaFrom, to: alphaTo}
+                            }
+                        }
+                    } catch (e) {
+                        console.log('[Err] Error occurred in JSON parsing');
+                        console.log('[Dbg] ' + text);
+                    }
+                } else if (obj.mode == 8) {
+                    obj.code = text; //Code comments are special
+                }
+            }
+            if (obj.text != null)
+                obj.text = obj.text.replace(/\u25a0/g, "\u2588");
+            tlist.push(obj);
+        }
+    }
+    return tlist;
+}
+
+/**
+ * Created by WhiteBlue on 16/2/9.
+ */
+
+function CommentManager(stage) {
+    this.stage = stage;
+    this.options = {
+        className: "cmt",
+        indexOffset: 0,        //弹幕层偏移
+        margin: 1,
+        fresh: 10               //刷新频率
+    };
+    this.commentLine = [];      //总弹幕队列
+    this.nowLine = [];          //当前播放弹幕
+    this.position = 0;          //当前弹幕位置
+    this.width = stage.offsetWidth;
+    this.height = stage.offsetHeight;
+
+    this.startTimer = function () {
+
+    };
+
+
+    this.stopTimer = function () {
+
+    };
+
+
+    //同屏队列适当位置插入新元素
+    this.nowLinePush = function (pushCmt) {
+        if (this.nowLine.length === 0) {
+            this.nowLine.push(pushCmt);
+            return;
+        }
+
+        if (this.nowLine[this.nowLine.length - 1].y <= pushCmt.y) {
+            this.nowLine.push(pushCmt);
+            return;
+        }
+
+        if (this.nowLine[0].y >= pushCmt.y) {
+            this.nowLine.unshift(pushCmt);
+            return;
+        }
+
+        var low = 0;
+        var high = this.nowLine.length - 1;
+
+        var i = 0;
+        var insertIndex = 0;
+
+        while (low < high) {
+            i = Math.floor((high + low + 1) / 2);
+            if (this.nowLine[i - 1].y <= pushCmt.y && this.nowLine[i].y >= pushCmt.y) {
+                insertIndex = i;
+                break;
+            }
+            if (this.nowLine[i - 1].y > pushCmt.y) {
+                high = i - 1;
+            } else {
+                low = i;
+            }
+        }
+        this.nowLine.splice(insertIndex, 0, pushCmt);
+    };
+
+    //同屏队列移除元素
+    this.nowLineRemove = function (removeCmt) {
+        var index = this.nowLine.indexOf(removeCmt);
+        if (index >= 0) {
+            this.nowLine.splice(index, 1);
+        }
+    };
+
+    this.setBounds = function () {
+        this.width = this.stage.offsetWidth;
+        this.height = this.stage.offsetHeight;
+    };
+
+    this.init = function () {
+        this.setBounds();
+    };
+
+    //插入弹幕
+    this.send = function (data) {
+        var cmt;
+        if (data.mode === 5 || data.mode === 4) {
+            cmt = new StaticComment(this, data);
+        } else if (data.mode === 1 || data.mode === 2) {
+            cmt = new ScrollComment(this, data);
+        } else {
+            console.log('不支持的弹幕');
+            return;
+        }
+
+        //执行初始化,创建node
+        cmt.init();
+
+        //dom插入
+        this.stage.appendChild(cmt.dom);
+
+        cmt.layout();
+
+        this.nowLinePush(cmt);
+    };
+
+    //跳转到指定时间
+    this.seek = function (locateTime) {
+        this.position = 0;
+        this.position = this.locate(locateTime);
+    };
+
+    //定位弹幕队列
+    this.locate = function (time) {
+        for (var i = this.position; i < this.commentLine.length; i++) {
+            var cm = this.commentLine[i];
+            if (cm.stime >= time) {
+                return i;
+            }
+        }
+        //播放完毕
+        return this.commentLine.length;
+    };
+
+    //按时间差更新弹幕队列
+    this.time = function (nowTime) {
+        nowTime -= 1;
+
+        if (this.position >= this.commentLine.length) {
+            return;
+        }
+
+        var end = this.locate(nowTime);
+
+        for (; this.position < end; this.position++) {
+            this.send(this.commentLine[this.position]);
+        }
+        this.position = end;
+
+        //弹幕过期检查
+        var length = this.nowLine.length;
+        for (var i = 0; i < length; i++) {
+            var cmt = this.nowLine[i];
+            if (!cmt.checkTime(nowTime)) {
+                this.remove(cmt);
+                length--;
+            }
+        }
+
+    };
+
+    //加载弹幕
+    this.load = function (timeLine) {
+        this.commentLine = timeLine;
+        this.commentLine.sort(function (a, b) {
+            if (a.stime >= b.stime) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+    };
+
+    //移除弹幕
+    this.remove = function (rmObj) {
+        this.nowLineRemove(rmObj);
+        try {
+            this.stage.removeChild(rmObj.dom);
+        } catch (e) {
+            console.log(e);
+            console.log(rmObj);
+        }
+    };
+
+
+    //清除舞台
+    this.clear = function () {
+        while (this.nowLine.length > 0) {
+            this.remove(this.nowLine[0]);
+        }
+    };
+}
+/**
+ * Created by WhiteBlue on 16/2/9.
+ *
+ * 基本弹幕对象
+ */
+
+var CommentObject = (function () {
+    function CommentObject(manager, init) {
+        this.align = 0;
+        this.index = 0;
+        this.mode = 1;
+        this.stime = 0;
+        this.text = "";
+        this.lifeTime = 4000;
+        this._size = 25;
+        this._color = 0xffffff;
+        this.manager = manager;
+
+        if (init.hasOwnProperty("align")) {
+            this.align = init["align"];
+        }
+        if (init.hasOwnProperty("stime")) {
+            this.stime = init["stime"];
+        }
+        if (init.hasOwnProperty("text")) {
+            this.text = init["text"];
+        }
+        if (init.hasOwnProperty("mode")) {
+            this.mode = init["mode"];
+        }
+        if (init.hasOwnProperty("color")) {
+            this._color = init["color"];
+        }
+        if (init.hasOwnProperty("size")) {
+            this._size = init["size"];
+        }
+        if (init.hasOwnProperty("x")) {
+            this._x = init["x"];
+        }
+        if (init.hasOwnProperty("y")) {
+            this._y = init["y"];
+        }
+    }
+
+    //取得/设置相对x轴坐标
+    Object.defineProperty(CommentObject.prototype, "x", {
+        get: function () {
+            if (this._x === null || this._x === undefined) {
+                if (this.align % 2 === 0) {
+                    this._x = this.dom.offsetLeft - this.manager.stage.offsetLeft;
+                } else {
+                    this._x = this.manager.stage.offsetWidth - (this.dom.offsetLeft - this.manager.stage.offsetLeft + this.dom.offsetWidth);
+                }
+            }
+            return this._x;
+        },
+        set: function (x) {
+            this._x = x;
+            if (this.align % 2 === 0) {
+                this.dom.style.left = this._x + "px";
+            } else {
+                this.dom.style.right = this._x + "px";
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    //取得/设置相对y轴坐标
+    Object.defineProperty(CommentObject.prototype, "y", {
+        get: function () {
+            if (this._y === null || this._y === undefined) {
+                if (this.align < 2) {
+                    this._y = this.dom.offsetTop;
+                } else {
+                    this._y = this.manager.stage.offsetHeight - (this.dom.offsetTop + this.dom.offsetHeight);
+                }
+            }
+            return this._y;
+        },
+        set: function (y) {
+            this._y = y;
+            if (this.align < 2) {
+                this.dom.style.top = this._y + "px";
+            } else {
+                this.dom.style.top = (this.manager.stage.offsetHeight - y - this.dom.offsetHeight) + "px";
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(CommentObject.prototype, "color", {
+        get: function () {
+            return this._color;
+        },
+        set: function (c) {
+            this._color = c;
+            var color = c.toString(16);
+            color = color.length >= 6 ? color : new Array(6 - color.length + 1).join("0") + color;
+            this.dom.style.color = "#" + color;
+            if (this._color === 0) {
+                this.dom.className = this.manager.options.className + " rshadow";
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(CommentObject.prototype, "width", {
+        get: function () {
+            if (this._width === null || this._width === undefined) {
+                this._width = this.dom.offsetWidth;
+            }
+            return this._width;
+        },
+        set: function (w) {
+            this._width = w;
+            this.dom.style.width = this._width + "px";
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(CommentObject.prototype, "height", {
+        get: function () {
+            if (this._height === null || this._height === undefined) {
+                this._height = this.dom.offsetHeight;
+            }
+            return this._height;
+        },
+        set: function (h) {
+            this._height = h;
+            this.dom.style.height = this._height + "px";
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+
+    Object.defineProperty(CommentObject.prototype, "size", {
+        get: function () {
+            return this._size;
+        },
+        set: function (s) {
+            this._size = s;
+            this.dom.style.fontSize = this._size + "px";
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+
+    //初始化,dom创建等等
+    CommentObject.prototype.init = function () {
+        var dom = document.createElement("div");
+        dom.className = this.manager.options.className;
+
+        dom.appendChild(document.createTextNode(this.text));
+
+        dom.textContent = this.text;
+        dom.innerText = this.text;
+
+        this.dom = dom;
+
+        this.color = this._color;
+        this.size = this._size;
+    };
+
+    //更新时间
+    CommentObject.prototype.checkTime = function (nowTime) {
+        return (this.stime + this.lifeTime) > nowTime;
+    };
+
+
+    //弹幕排布方法
+    CommentObject.prototype.layout = function () {
+    };
+
+    return CommentObject;
+})();
+
+
+
+/**
+ * Created by WhiteBlue on 16/2/11.
+ *
+ *
+ * 滚动弹幕: 1.上端滚动弹幕  2.下端滚动弹幕
+ */
+
+var ScrollComment = (function (_super) {
+    __extends(ScrollComment, _super);
+
+    function ScrollComment(manager, init) {
+        _super.call(this, manager, init);
+        switch (this.mode) {
+            case 1:
+                this.align = 0;
+                break;
+            case 2:
+                this.align = 3;
+                break;
+            case 6:
+                this.align = 1;
+                break;
+        }
+        this.follow = false;
+    }
+
+    ScrollComment.prototype._findOffsetY = function (index, channel, offset) {
+        var cmObj;
+        //取得起始位置(区别对齐方式)
+        var preY = offset;
+        for (var i = 0; i < this.manager.nowLine.length; i++) {
+            cmObj = this.manager.nowLine[i];
+            //弹幕同类型同层
+            if (cmObj.mode === this.mode && cmObj.index === index) {
+                if (cmObj.y - preY >= channel) {
+                    return preY;
+                }
+                //弹幕无碰撞
+                if (!cmObj.follow && (cmObj.timeLeft <= (cmObj.lifeTime * 3 / 4))) {
+                    cmObj.follow = true;
+                    return cmObj.y;
+                }
+                preY = cmObj.y + cmObj.height;
+            }
+        }
+        if (preY + channel <= this.manager.stage.offsetHeight) {
+            return preY;
+        }
+        return -1;
+    };
+
+    ScrollComment.prototype.transformCSS = function (trans) {
+        this.dom.style.transform = trans;
+        this.dom.style["webkitTransform"] = trans;
+        this.dom.style["msTransform"] = trans;
+        this.dom.style["oTransform"] = trans;
+    };
+
+    ScrollComment.prototype.layout = function () {
+        var index = 0;
+        var channel = this.size + 2 * this.manager.options.margin;
+        var offset = 0;
+        var insertY = -1;
+
+        while (insertY < 0) {
+            //if (index > 1000) {
+            //    console.error('Whoops!! too many loops ...');
+            //    return;
+            //}
+            insertY = this._findOffsetY(index, channel, offset);
+            index++;
+            offset += this.manager.options.indexOffset;
+        }
+        this.index = index - 1;
+        this.x = this.manager.width;
+        this.y = insertY;
+
+        var dx = -this.manager.width - this.width;
+
+        this.move(dx);
+    };
+
+    ScrollComment.prototype.move = function (dx) {
+        this.transformCSS("translateX(" + dx + "px)");
+        this.dom.style.transition = "transform " + this.lifeTime + "ms linear";
+    };
+
+    return ScrollComment;
+})(CommentObject);
+
+/**
+ * Created by WhiteBlue on 16/2/10.
+ *
+ *
+ * 静止弹幕: 4.底部弹幕  5.顶部弹幕
+ */
+
+var StaticComment = (function (_super) {
+    __extends(StaticComment, _super);
+
+    function StaticComment(manager, init) {
+        _super.call(this, manager, init);
+        this.align = (this.mode == 4) ? 3 : 0;
+    }
+
+    //寻找适合offsetY
+    StaticComment.prototype._findOffsetY = function (index, channel, offset) {
+        //取得起始位置(区别对齐方式)
+        var preY = offset;
+        for (var i = 0; i < this.manager.nowLine.length; i++) {
+            var cmObj = this.manager.nowLine[i];
+            //弹幕同类型同层
+            if (cmObj.mode === this.mode && cmObj.index === index) {
+                if (cmObj.y - preY >= channel) {
+                    return preY;
+                } else {
+                    preY = cmObj.y + cmObj.height;
+                }
+            }
+        }
+        if (preY + channel <= this.manager.stage.offsetHeight) {
+            return preY;
+        }
+        return -1;
+    };
+
+    //弹幕坐标适配(已插入真实dom)
+    StaticComment.prototype.layout = function () {
+        var index = 0;
+        var channel = this.size + 2 * this.manager.options.margin;
+        var offset = 0;
+        var insertY = -1;
+
+        while (insertY < 0) {
+            //if (index > 1000) {
+            //    console.error('Whoops!! too many loops ...');
+            //    return;
+            //}
+            insertY = this._findOffsetY(index, channel, offset);
+            index++;
+            offset += this.manager.options.indexOffset;
+        }
+
+        this.index = index - 1;
+        this.x = this.manager.stage.offsetLeft + (this.manager.stage.offsetWidth - this.width) / 2;
+        this.y = insertY;
+    };
+
+    return StaticComment;
+})(CommentObject);
+
