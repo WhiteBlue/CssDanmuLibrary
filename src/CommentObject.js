@@ -15,6 +15,7 @@ var CommentObject = (function () {
         this._size = 25;
         this._color = 0xffffff;
         this.manager = manager;
+        this.control = false;
 
         if (init.hasOwnProperty("align")) {
             this.align = init["align"];
@@ -175,6 +176,11 @@ var CommentObject = (function () {
 
     //弹幕排布方法
     CommentObject.prototype.layout = function () {
+    };
+
+
+    //弹幕排布方法
+    CommentObject.prototype.stop = function () {
     };
 
     return CommentObject;

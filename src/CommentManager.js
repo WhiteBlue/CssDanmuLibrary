@@ -17,14 +17,21 @@ function CommentManager(stage) {
     this.height = stage.offsetHeight;
 
     this.startTimer = function () {
-
+        for (var i = 0; i < this.nowLine.length; i++) {
+            if (this.nowLine[i].control) {
+                this.nowLine[i].start();
+            }
+        }
     };
 
 
     this.stopTimer = function () {
-
+        for (var i = 0; i < this.nowLine.length; i++) {
+            if (this.nowLine[i].control) {
+                this.nowLine[i].stop();
+            }
+        }
     };
-
 
     //同屏队列适当位置插入新元素
     this.nowLinePush = function (pushCmt) {
@@ -32,23 +39,19 @@ function CommentManager(stage) {
             this.nowLine.push(pushCmt);
             return;
         }
-
         if (this.nowLine[this.nowLine.length - 1].y <= pushCmt.y) {
             this.nowLine.push(pushCmt);
             return;
         }
-
         if (this.nowLine[0].y >= pushCmt.y) {
             this.nowLine.unshift(pushCmt);
             return;
         }
-
         var low = 0;
         var high = this.nowLine.length - 1;
 
         var i = 0;
         var insertIndex = 0;
-
         while (low < high) {
             i = Math.floor((high + low + 1) / 2);
             if (this.nowLine[i - 1].y <= pushCmt.y && this.nowLine[i].y >= pushCmt.y) {
@@ -75,6 +78,7 @@ function CommentManager(stage) {
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
+        this.initAnimation();
     };
 
     this.init = function () {
@@ -179,4 +183,19 @@ function CommentManager(stage) {
             this.remove(this.nowLine[0]);
         }
     };
+
+
+    this.initAnimation = function () {
+        var animation = "@keyframes cmt-move { to {  right: " + this.width + "px;  } }";
+        if (document.styleSheets && document.styleSheets.length) {
+            //避免重复定义
+            for (var i = 0; i < document.styleSheets[0].rules.length; i++) {
+                if (document.styleSheets[0].rules[i].name === "cmt-move") {
+                    document.styleSheets[0].removeRule(i);
+                    break;
+                }
+            }
+            document.styleSheets[0].insertRule(animation, 0);
+        }
+    }
 }

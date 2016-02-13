@@ -12,16 +12,14 @@ var ScrollComment = (function (_super) {
         _super.call(this, manager, init);
         switch (this.mode) {
             case 1:
-                this.align = 0;
+                this.align = 1;
                 break;
             case 2:
-                this.align = 3;
-                break;
-            case 6:
-                this.align = 1;
+                this.align = 2;
                 break;
         }
         this.follow = false;
+        this.control = true;
     }
 
     ScrollComment.prototype._findOffsetY = function (index, channel, offset) {
@@ -63,26 +61,41 @@ var ScrollComment = (function (_super) {
         var insertY = -1;
 
         while (insertY < 0) {
-            //if (index > 1000) {
-            //    console.error('Whoops!! too many loops ...');
-            //    return;
-            //}
+            if (index > 1000) {
+                console.error('Whoops!! too many loops ...');
+                return;
+            }
             insertY = this._findOffsetY(index, channel, offset);
             index++;
             offset += this.manager.options.indexOffset;
         }
         this.index = index - 1;
-        this.x = this.manager.width;
         this.y = insertY;
+        this.x = -this.width;
 
-        var dx = -this.manager.width - this.width;
+        //var dx = -this.manager.width - this.width;
+        this.moveAnimation();
+    };
 
-        this.move(dx);
+
+    ScrollComment.prototype.moveAnimation = function () {
+        this.dom.style['animation'] = "cmt-move " + this.lifeTime + "ms linear";
+        this.dom.style['animation-play-state'] = 'running';
     };
 
     ScrollComment.prototype.move = function (dx) {
         this.transformCSS("translateX(" + dx + "px)");
         this.dom.style.transition = "transform " + this.lifeTime + "ms linear";
+    };
+
+
+    ScrollComment.prototype.start = function () {
+        this.dom.style['animation-play-state'] = 'running';
+    };
+
+
+    ScrollComment.prototype.stop = function () {
+        this.dom.style['animation-play-state'] = 'paused';
     };
 
     return ScrollComment;
