@@ -94,3 +94,10 @@
     text-align: right;
     padding: 7px 10px;
 }
+
+@keyframes cmt-move {
+    100% {
+        left: auto;
+        right: 100%;
+    }
+}

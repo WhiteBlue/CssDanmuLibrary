@@ -1145,58 +1145,7 @@ var CSSCompatLayer = (function () {
     };
     return CSSCompatLayer;
 })();
-var CSSScrollComment = (function (_super) {
-    __extends(CSSScrollComment, _super);
-    function CSSScrollComment() {
-        _super.apply(this, arguments);
-        this._dirtyCSS = true;
-    }
-    Object.defineProperty(CSSScrollComment.prototype, "x", {
-        get: function () {
-            return (this.ttl / this.dur) * (this.parent.width + this.width) - this.width;
-        },
-        set: function (x) {
-            if (typeof this._x === "number") {
-                var dx = x - this._x;
-                this._x = x;
-                CSSCompatLayer.transform(this.dom, "translateX(" + dx + "px)");
-            } else {
-                this._x = x;
-                if (!this.absolute) {
-                    this._x *= this.parent.width;
-                }
-                if (this.align % 2 === 0) {
-                    this.dom.style.left = this._x + "px";
-                } else {
-                    this.dom.style.right = this._x + "px";
-                }
-            }
-        },
-        enumerable: true,
-        configurable: true
-    });
-    CSSScrollComment.prototype.update = function () {
-        if (this._dirtyCSS) {
-            this.dom.style.transition = "transform " + this.ttl + "ms linear";
-            this.x = -this.width;
-            this._dirtyCSS = false;
-        }
-    };
 
-    CSSScrollComment.prototype.invalidate = function () {
-        _super.prototype.invalidate.call(this);
-        this._dirtyCSS = true;
-    };
-
-    CSSScrollComment.prototype.stop = function () {
-        this.dom.style.transition = "";
-        this.x = this._x;
-        this._x = null;
-        this.x = (this.ttl / this.dur) * (this.parent.width + this.width) - this.width;
-        this._dirtyCSS = true;
-    };
-    return CSSScrollComment;
-})(ScrollComment);
 
 /** 
  * Comment Filters Module Simplified (only supports modifiers & types)
