@@ -20,6 +20,7 @@ var ScrollComment = (function (_super) {
         }
         this.follow = false;
         this.control = true;
+        this.lifeTime = 5000;
     }
 
     ScrollComment.prototype._findOffsetY = function (index, channel, offset) {
@@ -79,8 +80,11 @@ var ScrollComment = (function (_super) {
 
 
     ScrollComment.prototype.moveAnimation = function () {
-        this.dom.style['animation'] = "cmt-move " + this.lifeTime + "ms linear";
-        this.dom.style['animation-play-state'] = 'running';
+        var animation = "cmt-move " + this.lifeTime / 1000 + "s linear";
+        this.dom.style.animation = animation;
+        this.dom.style["-webkit-animation"] = animation;
+        this.dom.style["-moz-animation"] = animation;
+        this.dom.style["-o-animation"] = animation;
     };
 
     ScrollComment.prototype.move = function (dx) {
@@ -90,12 +94,12 @@ var ScrollComment = (function (_super) {
 
 
     ScrollComment.prototype.start = function () {
-        this.dom.style['animation-play-state'] = 'running';
+        this.dom.style["animation-play-state"] = "running";
     };
 
 
     ScrollComment.prototype.stop = function () {
-        this.dom.style['animation-play-state'] = 'paused';
+        this.dom.style["animation-play-state"] = "paused";
     };
 
     return ScrollComment;

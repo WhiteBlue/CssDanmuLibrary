@@ -78,7 +78,6 @@ function CommentManager(stage) {
     this.setBounds = function () {
         this.width = this.stage.offsetWidth;
         this.height = this.stage.offsetHeight;
-        this.initAnimation();
     };
 
     this.init = function () {
@@ -183,19 +182,4 @@ function CommentManager(stage) {
             this.remove(this.nowLine[0]);
         }
     };
-
-
-    this.initAnimation = function () {
-        var animation = "@keyframes cmt-move { to {  right: " + this.width + "px;  } }";
-        if (document.styleSheets && document.styleSheets.length) {
-            //避免重复定义
-            for (var i = 0; i < document.styleSheets[0].rules.length; i++) {
-                if (document.styleSheets[0].rules[i].name === "cmt-move") {
-                    document.styleSheets[0].removeRule(i);
-                    break;
-                }
-            }
-            document.styleSheets[0].insertRule(animation, 0);
-        }
-    }
 }
