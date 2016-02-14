@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="http://vjs.zencdn.net/5.6.0/video-js.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+    <link href="demo.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="row text-center">
+    <h3>CommentCoreLibrary CSS mode</h3>
+    <p>(弹幕略多,日常卡屏)</p>
+</div>
+
+<div class="container">
+    <div id="player-container" style="width: 900px;height: 600px;margin: 20px auto">
+        <video id="danmu_player" class="video-js vjs-default-skin" controls preload="auto" width="900" height="600"
+               poster="http://i0.hdslb.com/video/a3/a3b5e36e23c95ac048fee00871b630f8.jpg">
+            <p class="vjs-no-js">浏览器问题</p>
+        </video>
+    </div>
+</div>
+
+<script src="http://cdn.bootcss.com/jquery/2.2.0/jquery.min.js"></script>
+<script src="http://vjs.zencdn.net/5.6.0/video.js"></script>
+<script src="CommentCoreLibrary_demo.js"></script>
+<script src="PlayerPlugin.js"></script>
+<script>
+    $(document).ready(function () {
+        loadVideoJsAndPlugin();
+        loadVideo('http://cbmode.oss-cn-beijing.aliyuncs.com/otsukimi_recital.mp4', '207527.xml');
+    });
+</script>
+</body>
+</html>
