@@ -5,10 +5,19 @@
 function CommentManager(stage) {
     this.stage = stage;
     this.options = {
+        indexOffset: 0,     //弹幕层偏移
         className: "cmt",
-        indexOffset: 0,        //弹幕层偏移
         margin: 1,
-        fresh: 10               //刷新频率
+        fresh: 10,          //刷新频率
+        global: {
+            opacity: 1,
+            scale: 1
+        },
+        scroll: {
+            opacity: 1,
+            scale: 1
+        },
+        limit: 0
     };
     this.commentLine = [];      //总弹幕队列
     this.nowLine = [];          //当前播放弹幕

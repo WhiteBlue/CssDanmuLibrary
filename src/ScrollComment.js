@@ -12,15 +12,17 @@ var ScrollComment = (function (_super) {
         _super.call(this, manager, init);
         switch (this.mode) {
             case 1:
-                this.align = 1;
+                this.align = 0;
                 break;
             case 2:
                 this.align = 2;
                 break;
+            case 6:
+                this.align = 1;
         }
         this.follow = false;
         this.control = true;
-        this.lifeTime = 5000;
+        this.lifeTime = 4000 * manager.options.scroll.scale;
     }
 
     ScrollComment.prototype._findOffsetY = function (index, channel, offset) {
@@ -48,12 +50,6 @@ var ScrollComment = (function (_super) {
         return -1;
     };
 
-    ScrollComment.prototype.transformCSS = function (trans) {
-        this.dom.style.transform = trans;
-        this.dom.style["webkitTransform"] = trans;
-        this.dom.style["msTransform"] = trans;
-        this.dom.style["oTransform"] = trans;
-    };
 
     ScrollComment.prototype.layout = function () {
         var index = 0;
@@ -63,7 +59,6 @@ var ScrollComment = (function (_super) {
 
         while (insertY < 0) {
             if (index > 1000) {
-                console.error('Whoops!! too many loops ...');
                 return;
             }
             insertY = this._findOffsetY(index, channel, offset);
@@ -74,24 +69,17 @@ var ScrollComment = (function (_super) {
         this.y = insertY;
         this.x = -this.width;
 
-        //var dx = -this.manager.width - this.width;
         this.moveAnimation();
     };
 
-
     ScrollComment.prototype.moveAnimation = function () {
-        var animation = "cmt-move " + this.lifeTime / 1000 + "s linear";
+        var locate = this.align % 2 == 0 ? '-left ' : '-right ';
+        var animation = "cmt-move" + locate + this.lifeTime / 1000 + "s linear";
         this.dom.style.animation = animation;
         this.dom.style["-webkit-animation"] = animation;
         this.dom.style["-moz-animation"] = animation;
         this.dom.style["-o-animation"] = animation;
     };
-
-    ScrollComment.prototype.move = function (dx) {
-        this.transformCSS("translateX(" + dx + "px)");
-        this.dom.style.transition = "transform " + this.lifeTime + "ms linear";
-    };
-
 
     ScrollComment.prototype.start = function () {
         this.dom.style["animation-play-state"] = "running";

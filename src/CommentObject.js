@@ -11,7 +11,7 @@ var CommentObject = (function () {
         this.mode = 1;
         this.stime = 0;
         this.text = "";
-        this.lifeTime = 4000;
+        this.lifeTime = 4000 * manager.options.global.scale;
         this._size = 25;
         this._color = 0xffffff;
         this.manager = manager;
@@ -58,9 +58,9 @@ var CommentObject = (function () {
         set: function (x) {
             this._x = x;
             if (this.align % 2 === 0) {
-                this.dom.style.left = this._x + "px";
-            } else {
                 this.dom.style.right = this._x + "px";
+            } else {
+                this.dom.style.left = this._x + "px";
             }
         },
         enumerable: true,
