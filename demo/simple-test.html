@@ -19,6 +19,18 @@
             height: 600px;
             background-color: #8888ff;
         }
+
+        @keyframes cmt-move-left {
+            100% {
+                right: 100%;
+            }
+        }
+
+        @keyframes cmt-move-right {
+            100% {
+                left: 100%;
+            }
+        }
     </style>
 
     <link rel="stylesheet" href="../dest/css/main.css"/>
@@ -44,14 +56,18 @@
 <script>
 
     $(document).ready(function () {
+        alert('#23333'.indexOf('d'));
+
         var cm = new CommentManager(document.getElementById('danmu_container'));
 
         cm.init();
 
+        cm.options.global.scale = 3;
+
         cm.startTimer();
 
         for (var i = 0; i < 30; i++) {
-            cm.send({mode: 5, text: "第" + i + "个滚动弹幕", color: 'blue'});
+            cm.send({mode: 1, text: "第" + i + "个滚动弹幕", color: '#228b22'});
         }
 //
 //        for (var j = 0; j < 15; j++) {

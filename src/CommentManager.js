@@ -171,6 +171,7 @@ function CommentManager(stage) {
                 return -1;
             }
         });
+        this.position = 0;
     };
 
     //移除弹幕

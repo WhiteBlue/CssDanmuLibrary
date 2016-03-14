@@ -40,3 +40,16 @@
 .abp .container .cmt.rshadow{
   text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
 }
+
+
+@keyframes cmt-move-left {
+  100% {
+    right: 100%;
+  }
+}
+
+@keyframes cmt-move-right {
+  100% {
+    left: 100%;
+  }
+}

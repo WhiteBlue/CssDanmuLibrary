@@ -22,7 +22,7 @@ var ScrollComment = (function (_super) {
         }
         this.follow = false;
         this.control = true;
-        this.lifeTime = 4000 * manager.options.scroll.scale;
+        this.lifeTime *= manager.options.scroll.scale;
     }
 
     ScrollComment.prototype._findOffsetY = function (index, channel, offset) {

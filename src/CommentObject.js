@@ -99,7 +99,10 @@ var CommentObject = (function () {
             this._color = c;
             var color = c.toString(16);
             color = color.length >= 6 ? color : new Array(6 - color.length + 1).join("0") + color;
-            this.dom.style.color = "#" + color;
+            if (color.indexOf('#') !== 0) {
+                color = '#'.concat(color);
+            }
+            this.dom.style.color = color;
             if (this._color === 0) {
                 this.dom.className = this.manager.options.className + " rshadow";
             }
