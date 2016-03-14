@@ -7,17 +7,31 @@ function CommentManager(stage) {
     this.options = {
         className: "cmt",
         indexOffset: 0,        //弹幕层偏移
-        margin: 2,
+        margin: 1,
         fresh: 10               //刷新频率
     };
     this.commentLine = [];      //总弹幕队列
     this.nowLine = [];          //当前播放弹幕
     this.position = 0;          //当前弹幕位置
-    this.lastTime = 0;
     this.width = stage.offsetWidth;
     this.height = stage.offsetHeight;
-    this.timer = null;
 
+    this.startTimer = function () {
+        for (var i = 0; i < this.nowLine.length; i++) {
+            if (this.nowLine[i].control) {
+                this.nowLine[i].start();
+            }
+        }
+    };
+
+
+    this.stopTimer = function () {
+        for (var i = 0; i < this.nowLine.length; i++) {
+            if (this.nowLine[i].control) {
+                this.nowLine[i].stop();
+            }
+        }
+    };
 
     //同屏队列适当位置插入新元素
     this.nowLinePush = function (pushCmt) {
@@ -25,23 +39,19 @@ function CommentManager(stage) {
             this.nowLine.push(pushCmt);
             return;
         }
-
         if (this.nowLine[this.nowLine.length - 1].y <= pushCmt.y) {
             this.nowLine.push(pushCmt);
             return;
         }
-
         if (this.nowLine[0].y >= pushCmt.y) {
             this.nowLine.unshift(pushCmt);
             return;
         }
-
         var low = 0;
         var high = this.nowLine.length - 1;
 
         var i = 0;
         var insertIndex = 0;
-
         while (low < high) {
             i = Math.floor((high + low + 1) / 2);
             if (this.nowLine[i - 1].y <= pushCmt.y && this.nowLine[i].y >= pushCmt.y) {
@@ -57,7 +67,7 @@ function CommentManager(stage) {
         this.nowLine.splice(insertIndex, 0, pushCmt);
     };
 
-    //同屏队列移除元素并重排序
+    //同屏队列移除元素
     this.nowLineRemove = function (removeCmt) {
         var index = this.nowLine.indexOf(removeCmt);
         if (index >= 0) {
@@ -74,32 +84,15 @@ function CommentManager(stage) {
         this.setBounds();
     };
 
-    this.startTimer = function () {
-        if (this.timer) {
-            return;
-        }
-        var cm = this;
-        this.timer = window.setInterval(function () {
-            //取时间差
-            var elapsed = new Date().getTime() - cm.lastTime;
-            cm.lastTime = new Date().getTime();
-            cm.onTimerEvent(elapsed);
-        }, this.options.fresh);
-    };
-
-    this.stopTimer = function () {
-        window.clearInterval(this.timer);
-        this.timer = 0;
-    };
-
     //插入弹幕
     this.send = function (data) {
         var cmt;
         if (data.mode === 5 || data.mode === 4) {
             cmt = new StaticComment(this, data);
-        } else if (data.mode === 1 || data.mode === 2) {
+        } else if (data.mode === 1 || data.mode === 2 || data.mode == 6) {
             cmt = new ScrollComment(this, data);
         } else {
+            console.log('不支持的弹幕');
             return;
         }
 
@@ -133,31 +126,30 @@ function CommentManager(stage) {
     };
 
     //按时间差更新弹幕队列
-    this.time = function (betweenTime) {
-        betweenTime -= 1;
+    this.time = function (nowTime) {
+        nowTime -= 1;
 
         if (this.position >= this.commentLine.length) {
             return;
         }
 
-        var end = this.locate(betweenTime);
+        var end = this.locate(nowTime);
 
         for (; this.position < end; this.position++) {
             this.send(this.commentLine[this.position]);
         }
         this.position = end;
-    };
 
-    //更新时间,移动弹幕
-    this.onTimerEvent = function (timePassed) {
+        //弹幕过期检查
         var length = this.nowLine.length;
         for (var i = 0; i < length; i++) {
             var cmt = this.nowLine[i];
-            if (!cmt.time(timePassed)) {
+            if (!cmt.checkTime(nowTime)) {
                 this.remove(cmt);
                 length--;
             }
         }
+
     };
 
     //加载弹幕
