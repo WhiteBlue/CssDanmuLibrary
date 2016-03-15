@@ -95,9 +95,14 @@
     padding: 7px 10px;
 }
 
-@keyframes cmt-move {
+@keyframes cmt-move-left {
     100% {
-        left: auto;
         right: 100%;
+    }
+}
+
+@keyframes cmt-move-right {
+    100% {
+        left: 100%;
     }
 }
