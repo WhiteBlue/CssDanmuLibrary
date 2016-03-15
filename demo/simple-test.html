@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="renderer" content="ie-comp">
     <title>Test Danmu Libruary</title>
 
     <style>
@@ -90,17 +91,21 @@
     }
 
     $('#dm_start').on('click', function () {
-        window.timer = setInterval(function () {
-            cm.startTimer();
-            cm.time(window.nowTime);
-            window.nowTime += 10;
-        }, 10)
+        if (!window.timer) {
+            alert('ok');
+            window.timer = setInterval(function () {
+                cm.startTimer();
+                cm.time(window.nowTime);
+                window.nowTime += 10;
+            }, 10);
+        }
     });
 
     $('#dm_stop').on('click', function () {
         cm.stopTimer();
         if (window.timer) {
             window.clearInterval(window.timer);
+            window.timer = null;
         }
     });
 
