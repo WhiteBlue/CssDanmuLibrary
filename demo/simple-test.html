@@ -16,8 +16,12 @@
 
         #danmu_container {
             width: 100%;
-            height: 600px;
+            height: 400px;
             background-color: #8888ff;
+        }
+
+        .dm_control {
+            padding: 20px 40%;
         }
 
         @keyframes cmt-move-left {
@@ -42,51 +46,80 @@
 
     <h3>Comment Test</h3>
 
+    <div class="dm_control">
+        <button id="dm_start">Start</button>
+        <button id="dm_stop">Stop</button>
+        <button id="dm_reset">Reset</button>
+    </div>
+
     <div id='my-player' class='abp'>
         <div id='danmu_container' class='container'></div>
     </div>
 
-
 </div>
 
-<script src="http://cdn.bootcss.com/jquery/2.2.0/jquery.js"></script>
+<script src="http://cdn.bootcss.com/jquery/1.12.1/jquery.min.js"></script>
 
 <script src="../dest/js/app.js"></script>
 
 <script>
+    function loadDM(cm, url) {
+        var xmlhttp;
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        }
+        else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                if (navigator.appName == 'Microsoft Internet Explorer') {
+                    var f = new ActiveXObject("Microsoft.XMLDOM");
+                    f.async = false;
+                    f.loadXML(xmlhttp.responseText);
+                    cm.load(BilibiliParser(f));
+                } else {
+                    cm.load(BilibiliParser(xmlhttp.responseXML));
+                }
+            }
+        }
+    }
+
+    $('#dm_start').on('click', function () {
+        window.timer = setInterval(function () {
+            cm.startTimer();
+            cm.time(window.nowTime);
+            window.nowTime += 10;
+        }, 10)
+    });
+
+    $('#dm_stop').on('click', function () {
+        cm.stopTimer();
+        if (window.timer) {
+            window.clearInterval(window.timer);
+        }
+    });
+
+    $('#dm_reset').on('click', function () {
+        cm.clear();
+        cm.init();
+    });
 
     $(document).ready(function () {
-        alert('#23333'.indexOf('d'));
+        window.nowTime = 0;
 
         var cm = new CommentManager(document.getElementById('danmu_container'));
 
         cm.init();
 
-        cm.options.global.scale = 3;
+        cm.options.scroll.scale = 3;
 
-        cm.startTimer();
+        loadDM(cm, 'getdm.xml');
 
-        for (var i = 0; i < 30; i++) {
-            cm.send({mode: 1, text: "第" + i + "个滚动弹幕", color: '#228b22'});
-        }
-//
-//        for (var j = 0; j < 15; j++) {
-//            cm.send({mode: 4, text: "第" + j + "个底部弹幕", align: 3});
-//        }
-
-//        CommentLoader('http://comment.bilibili.cn/5953559.xml', cm);
-//
-//        setTimeout(function () {
-//            alert('弹幕开始');
-//
-//
-//            cm.time(1000);
-//
-//        }, 1000);
-
-
+        window.cm = cm;
     });
-
 </script>
 
 </body>

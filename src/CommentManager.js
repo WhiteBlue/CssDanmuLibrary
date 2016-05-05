@@ -48,11 +48,11 @@ function CommentManager(stage) {
             this.nowLine.push(pushCmt);
             return;
         }
-        if (this.nowLine[this.nowLine.length - 1].y <= pushCmt.y) {
+        if (this.nowLine[this.nowLine.length - 1].offsetY() <= pushCmt.offsetY()) {
             this.nowLine.push(pushCmt);
             return;
         }
-        if (this.nowLine[0].y >= pushCmt.y) {
+        if (this.nowLine[0].offsetY() >= pushCmt.offsetY()) {
             this.nowLine.unshift(pushCmt);
             return;
         }
@@ -63,11 +63,11 @@ function CommentManager(stage) {
         var insertIndex = 0;
         while (low < high) {
             i = Math.floor((high + low + 1) / 2);
-            if (this.nowLine[i - 1].y <= pushCmt.y && this.nowLine[i].y >= pushCmt.y) {
+            if (this.nowLine[i - 1].offsetY() <= pushCmt.offsetY() && this.nowLine[i].offsetY() >= pushCmt.offsetY()) {
                 insertIndex = i;
                 break;
             }
-            if (this.nowLine[i - 1].y > pushCmt.y) {
+            if (this.nowLine[i - 1].offsetY() > pushCmt.offsetY()) {
                 high = i - 1;
             } else {
                 low = i;
@@ -91,6 +91,7 @@ function CommentManager(stage) {
 
     this.init = function () {
         this.setBounds();
+        this.position = 0;
     };
 
     //插入弹幕
@@ -136,18 +137,21 @@ function CommentManager(stage) {
 
     //按时间差更新弹幕队列
     this.time = function (nowTime) {
-        nowTime -= 1;
-
-        if (this.position >= this.commentLine.length) {
+        //播放结束
+        if (this.nowLine.length === 0 && this.position === this.commentLine.length) {
             return;
         }
 
-        var end = this.locate(nowTime);
+        nowTime -= 1;
 
-        for (; this.position < end; this.position++) {
-            this.send(this.commentLine[this.position]);
+        if (this.position < this.commentLine.length) {
+            var end = this.locate(nowTime);
+
+            for (; this.position < end; this.position++) {
+                this.send(this.commentLine[this.position]);
+            }
+            this.position = end;
         }
-        this.position = end;
 
         //弹幕过期检查
         var length = this.nowLine.length;
@@ -158,12 +162,12 @@ function CommentManager(stage) {
                 length--;
             }
         }
-
     };
 
     //加载弹幕
     this.load = function (timeLine) {
         this.commentLine = timeLine;
+        this.position = 0;
         this.commentLine.sort(function (a, b) {
             if (a.stime >= b.stime) {
                 return 1;
@@ -171,18 +175,12 @@ function CommentManager(stage) {
                 return -1;
             }
         });
-        this.position = 0;
     };
 
     //移除弹幕
     this.remove = function (rmObj) {
         this.nowLineRemove(rmObj);
-        try {
-            this.stage.removeChild(rmObj.dom);
-        } catch (e) {
-            console.log(e);
-            console.log(rmObj);
-        }
+        this.stage.removeChild(rmObj.dom);
     };
 
 

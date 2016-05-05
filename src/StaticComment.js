@@ -17,14 +17,14 @@ var StaticComment = (function (_super) {
     StaticComment.prototype._findOffsetY = function (index, channel, offset) {
         //取得起始位置(区别对齐方式)
         var preY = offset;
-        for (var i = 0; i < this.manager.nowLine.length; i++) {
+        for (var i in this.manager.nowLine) {
             var cmObj = this.manager.nowLine[i];
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
-                if (cmObj.y - preY >= channel) {
+                if (cmObj.offsetY() - preY >= channel) {
                     return preY;
                 } else {
-                    preY = cmObj.y + cmObj.height;
+                    preY = cmObj.offsetY() + cmObj.Height();
                 }
             }
         }
@@ -37,23 +37,19 @@ var StaticComment = (function (_super) {
     //弹幕坐标适配(已插入真实dom)
     StaticComment.prototype.layout = function () {
         var index = 0;
-        var channel = this.size + 2 * this.manager.options.margin;
+        var channel = this.Height() + 2 * this.manager.options.margin;
         var offset = 0;
         var insertY = -1;
 
         while (insertY < 0) {
-            if (index > 1000) {
-                console.error('Whoops!! too many loops ...');
-                return;
-            }
             insertY = this._findOffsetY(index, channel, offset);
             index++;
             offset += this.manager.options.indexOffset;
         }
 
         this.index = index - 1;
-        this.x = this.manager.stage.offsetLeft + (this.manager.stage.offsetWidth - this.width) / 2;
-        this.y = insertY;
+        this.offsetX(this.manager.stage.offsetLeft + (this.manager.stage.offsetWidth - this.Width()) / 2);
+        this.offsetY(insertY);
     };
 
     return StaticComment;

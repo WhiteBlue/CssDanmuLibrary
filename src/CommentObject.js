@@ -12,10 +12,12 @@ var CommentObject = (function () {
         this.stime = 0;
         this.text = "";
         this.lifeTime = 4000 * manager.options.global.scale;
+        //this.timeLeft = 4000 * manager.options.global.scale;
         this._size = 25;
         this._color = 0xffffff;
         this.manager = manager;
         this.control = false;
+        this._border = false;
 
         if (init.hasOwnProperty("align")) {
             this.align = init["align"];
@@ -41,11 +43,13 @@ var CommentObject = (function () {
         if (init.hasOwnProperty("y")) {
             this._y = init["y"];
         }
+        if (init.hasOwnProperty("border")) {
+            this._border = init["border"];
+        }
     }
 
-    //取得/设置相对x轴坐标
-    Object.defineProperty(CommentObject.prototype, "x", {
-        get: function () {
+    CommentObject.prototype.offsetX = function (x) {
+        if (x === null || x === undefined) {
             if (this._x === null || this._x === undefined) {
                 if (this.align % 2 === 0) {
                     this._x = this.dom.offsetLeft - this.manager.stage.offsetLeft;
@@ -54,22 +58,19 @@ var CommentObject = (function () {
                 }
             }
             return this._x;
-        },
-        set: function (x) {
+        } else {
             this._x = x;
             if (this.align % 2 === 0) {
                 this.dom.style.right = this._x + "px";
             } else {
                 this.dom.style.left = this._x + "px";
             }
-        },
-        enumerable: true,
-        configurable: true
-    });
+        }
+    };
 
-    //取得/设置相对y轴坐标
-    Object.defineProperty(CommentObject.prototype, "y", {
-        get: function () {
+
+    CommentObject.prototype.offsetY = function (y) {
+        if (y === null || y === undefined) {
             if (this._y === null || this._y === undefined) {
                 if (this.align < 2) {
                     this._y = this.dom.offsetTop;
@@ -78,24 +79,21 @@ var CommentObject = (function () {
                 }
             }
             return this._y;
-        },
-        set: function (y) {
+        } else {
             this._y = y;
             if (this.align < 2) {
                 this.dom.style.top = this._y + "px";
             } else {
                 this.dom.style.top = (this.manager.stage.offsetHeight - y - this.dom.offsetHeight) + "px";
             }
-        },
-        enumerable: true,
-        configurable: true
-    });
+        }
+    };
 
-    Object.defineProperty(CommentObject.prototype, "color", {
-        get: function () {
+
+    CommentObject.prototype.Color = function (c) {
+        if (c === null || c === undefined) {
             return this._color;
-        },
-        set: function (c) {
+        } else {
             this._color = c;
             var color = c.toString(16);
             color = color.length >= 6 ? color : new Array(6 - color.length + 1).join("0") + color;
@@ -106,53 +104,54 @@ var CommentObject = (function () {
             if (this._color === 0) {
                 this.dom.className = this.manager.options.className + " rshadow";
             }
-        },
-        enumerable: true,
-        configurable: true
-    });
+        }
+    };
 
-    Object.defineProperty(CommentObject.prototype, "width", {
-        get: function () {
+
+    CommentObject.prototype.Width = function (w) {
+        if (w === null || w === undefined) {
             if (this._width === null || this._width === undefined) {
                 this._width = this.dom.offsetWidth;
             }
             return this._width;
-        },
-        set: function (w) {
+        } else {
             this._width = w;
             this.dom.style.width = this._width + "px";
-        },
-        enumerable: true,
-        configurable: true
-    });
+        }
+    };
 
-    Object.defineProperty(CommentObject.prototype, "height", {
-        get: function () {
+
+    CommentObject.prototype.Height = function (h) {
+        if (h === null || h === undefined) {
             if (this._height === null || this._height === undefined) {
                 this._height = this.dom.offsetHeight;
             }
             return this._height;
-        },
-        set: function (h) {
+        } else {
             this._height = h;
             this.dom.style.height = this._height + "px";
-        },
-        enumerable: true,
-        configurable: true
-    });
+        }
+    };
 
 
-    Object.defineProperty(CommentObject.prototype, "size", {
-        get: function () {
+    CommentObject.prototype.Size = function (s) {
+        if (s === null || s === undefined) {
             return this._size;
-        },
-        set: function (s) {
+        } else {
             this._size = s;
             this.dom.style.fontSize = this._size + "px";
-        },
-        enumerable: true,
-        configurable: true
-    });
+        }
+    };
+
+
+    CommentObject.prototype.Border = function (b) {
+        if (b === null || b === undefined) {
+            return this._border;
+        } else {
+            this._border = b;
+            this.dom.style.border = b;
+        }
+    };
 
 
     //初始化,dom创建等等
@@ -167,13 +166,19 @@ var CommentObject = (function () {
 
         this.dom = dom;
 
-        this.color = this._color;
-        this.size = this._size;
+        //新弹幕边框设置
+        if (this._border) {
+            dom.style.border = "2px solid red";
+        }
+
+        this.Color(this._color);
+        this.Size(this._size);
     };
 
     //更新时间
     CommentObject.prototype.checkTime = function (nowTime) {
-        return (this.stime + this.lifeTime) > nowTime;
+        //this.timeLeft = (this.stime + this.lifeTime) - nowTime;
+        return (this.stime + this.lifeTime) >= nowTime;
     };
 
 
@@ -182,8 +187,10 @@ var CommentObject = (function () {
     };
 
 
-    //弹幕排布方法
     CommentObject.prototype.stop = function () {
+    };
+
+    CommentObject.prototype.start = function () {
     };
 
     return CommentObject;

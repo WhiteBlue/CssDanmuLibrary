@@ -33,15 +33,15 @@ var ScrollComment = (function (_super) {
             cmObj = this.manager.nowLine[i];
             //弹幕同类型同层
             if (cmObj.mode === this.mode && cmObj.index === index) {
-                if (cmObj.y - preY >= channel) {
+                if (cmObj.offsetY() - preY >= channel) {
                     return preY;
                 }
                 //弹幕无碰撞
-                if (!cmObj.follow && (cmObj.timeLeft <= (cmObj.lifeTime * 3 / 4))) {
+                if ((!cmObj.follow) && (cmObj.timeLeft <= (cmObj.lifeTime * 0.5))) {
                     cmObj.follow = true;
-                    return cmObj.y;
+                    return cmObj.offsetY();
                 }
-                preY = cmObj.y + cmObj.height;
+                preY = cmObj.offsetY() + cmObj.Height();
             }
         }
         if (preY + channel <= this.manager.stage.offsetHeight) {
@@ -53,7 +53,7 @@ var ScrollComment = (function (_super) {
 
     ScrollComment.prototype.layout = function () {
         var index = 0;
-        var channel = this.size + 2 * this.manager.options.margin;
+        var channel = this.Size() + 2 * this.manager.options.margin;
         var offset = 0;
         var insertY = -1;
 
@@ -66,11 +66,12 @@ var ScrollComment = (function (_super) {
             offset += this.manager.options.indexOffset;
         }
         this.index = index - 1;
-        this.y = insertY;
-        this.x = -this.width;
+        this.offsetY(insertY);
+        this.offsetX(-this.Width());
 
         this.moveAnimation();
     };
+
 
     ScrollComment.prototype.moveAnimation = function () {
         var locate = this.align % 2 == 0 ? '-left ' : '-right ';

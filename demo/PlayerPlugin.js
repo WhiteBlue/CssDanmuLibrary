@@ -60,6 +60,7 @@ function loadVideoJsAndPlugin() {
                 });
 
                 video.addEventListener("seeked", function () {
+                    _this.cmManager.seek(Math.floor(video.currentTime * 1000));
                     _this.cmManager.clear();
                 });
 
@@ -120,6 +121,7 @@ function loadVideoJsAndPlugin() {
             }
             return this;
         }
+
         this.danmu = new Danmu(this);
     });
     window.vjs = videojs('danmu_player');
