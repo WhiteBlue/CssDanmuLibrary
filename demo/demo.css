@@ -19,13 +19,10 @@
     padding: 3px 0 0 0;
     margin: 0;
     line-height: 100%;
-    font-family: Simhei, Simsun, Heiti, "wqy-zenhei", "MS Mincho", "Meiryo", "Microsoft Yahei", monospace;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 400;
     text-decoration: none;
-    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-    color: #fff;
     letter-spacing: 0;
-    font-size: 25px;
     position: absolute;
     word-break: keep-all;
     text-wrap: none;
@@ -95,14 +92,20 @@
     padding: 7px 10px;
 }
 
+/* animation */
+.cmt {
+    will-change: transform;
+}
+
 @keyframes cmt-move-left {
-    100% {
-        right: 100%;
+    from {
+        transform: translateX(100%);
     }
 }
 
 @keyframes cmt-move-right {
-    100% {
-        left: 100%;
+    to {
+        transform: translateX(-100%);
     }
 }
+
