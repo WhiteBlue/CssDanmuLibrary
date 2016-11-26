@@ -1,0 +1,61 @@
+.abp {
+    position: relative;
+}
+
+.abp .container {
+    position: absolute;
+    display: block;
+    overflow: hidden;
+    margin: 0;
+    border: 0;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 9999;
+    touch-callout: none;
+    user-select: none;
+}
+
+.abp .container .cmt {
+    white-space: nowrap;
+    padding: 3px 0 0 0;
+    margin: 0;
+    line-height: 100%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    text-decoration: none;
+    letter-spacing: 0;
+    position: absolute;
+    word-break: keep-all;
+    text-wrap: none;
+    border: 0 !important;
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+
+}
+
+.abp .container .cmt.noshadow {
+    text-shadow: none;
+}
+
+.abp .container .cmt.rshadow {
+    text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+/* animation */
+.cmt {
+    will-change: transform;
+}
+
+@keyframes cmt-move-left {
+    from {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes cmt-move-right {
+    to {
+        transform: translateX(-100%);
+    }
+}
